@@ -17,7 +17,7 @@ class Camposanto(models.Model):
     direccion = models.CharField (max_length=100)
     telefono = models.CharField(max_length=15)
     estado = models.BooleanField(default=True)
-    logo = models.ImageField(max_length=200, null=True, blank=True)
+    logo = models.ImageField(upload_to='logos', max_length=200, null=True, blank=True)
     id_empresa = models.ForeignKey(Empresa, on_delete=models.PROTECT, null=True, blank=True)
 
 class Red_social(models.Model):
