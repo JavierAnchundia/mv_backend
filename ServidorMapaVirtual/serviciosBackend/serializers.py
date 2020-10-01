@@ -60,6 +60,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
             'username',
             'password',
             'telefono',
+            'is_facebook',
             'genero',
             'direccion',
             'id_camposanto',

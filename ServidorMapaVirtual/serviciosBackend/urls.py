@@ -5,6 +5,8 @@ from rest_framework.routers import DefaultRouter
 from serviciosBackend import views
 
 urlpatterns = [
+    path('get_token_facebook/', views.Create_User_Facebook.as_view()),
+
     path('camposantos/', views.CamposantoView.as_view()),
     path('camposanto/<str:pk>/', views.CamposantoViewSet.as_view()),
     path('red_social_post/', views.Red_socialPost.as_view()),

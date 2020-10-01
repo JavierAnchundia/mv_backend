@@ -118,10 +118,13 @@ class User(AbstractBaseUser):
     ]
     first_name = models.CharField(max_length=50, null=True, blank=True)
     last_name = models.CharField(max_length=50, null=True, blank=True)
-    email = models.EmailField(_('email address'), max_length=200)
+    # se pordria agregar que el email no sea requerido
+    email = models.EmailField(_('email address'), max_length=200, default=None, null=True, blank=True)
+    # se debe cambiar que el username es requerido
     username = models.CharField(max_length=50, unique=True, default=None, null=True, blank=True)
     password = models.CharField(max_length=100)
     telefono = models.CharField(max_length=10, default=None, null=True, blank=True)
+    is_facebook = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
     genero = models.CharField(max_length=15, default=None, null=True, blank=True)
     direccion = models.CharField(max_length=100, default=None, null=True, blank=True)

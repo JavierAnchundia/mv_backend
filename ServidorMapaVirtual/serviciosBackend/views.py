@@ -6,8 +6,8 @@ from rest_framework import status
 from rest_framework import viewsets
 from rest_framework.permissions import (AllowAny, IsAuthenticated)
 from .permissions import IsLoggedInUserOrAdmin, IsAdminUser
-from django.conf import settings
-from django.core.mail import send_mail
+from .servicioFacebook import Facebook
+from .get_jwt_user import Json_web_token
 
 from .models import User, Empresa, Red_social, Camposanto, Punto_geolocalizacion, Sector, Tipo_sepultura, Responsable_difunto, Difunto, Permiso, User_permisos
 from .serializers import UserProfileSerializer, EmpresaSerializer, Red_socialSerializer, CamposantoSerializer, Punto_geoSerializer, SectorSerializer, Tipo_sepulturaSerializer, Responsable_difuntoSerializer, DifuntoSerializer, PermisoSerializer, User_permisosSerializer
@@ -198,6 +198,7 @@ class EmpresaViewSet(APIView):
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 #     hasta aqui
+
 class UserViewSet(viewsets.ModelViewSet):
     # permission_classes = (IsAuthenticated,)
     queryset = User.objects.all()
@@ -286,3 +287,35 @@ class User_PermisosPost(APIView):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class Create_User_Facebook(APIView):
+    def post(self, request, format=None):
+        access_token = request.data['access_token']
+        # instancia de la clase facebook
+        f = Facebook()
+        # se obtienen los datos a traves de la api de facebook
+        data = f.get_info_facebook(access_token)
+        # instancia de la clase Json_web_token
+        jwt = Json_web_token()
+        # validar que no existe dicho usuarios guardado
+        usuario_validate = self.obtener_User(data['username'])
+
+        if usuario_validate:
+            token = jwt.get_token_user(usuario_validate)
+            return Response(token, status=status.HTTP_201_CREATED)
+        else:
+            user_serializer = UserProfileSerializer(data= data)
+            if user_serializer.is_valid():
+                user_save = user_serializer.save()
+                if user_save :
+                    # instancia de la clase Json_web_token
+                    jwt = Json_web_token()
+                    token = jwt.get_token_user(user_save)
+                return Response(token, status=status.HTTP_201_CREATED)
+            return Response(user_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def obtener_User(self, username):
+        try:
+            return User.objects.get(username = username)
+        except User.DoesNotExist:
+            return None
