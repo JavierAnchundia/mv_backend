@@ -158,3 +158,48 @@ class User_permisos(models.Model):
     id_user_permiso = models.AutoField(primary_key=True, unique=True)
     id_user = models.ForeignKey(User, on_delete=models.CASCADE)
     id_permiso = models.ForeignKey(Permiso, on_delete=models.CASCADE)
+
+#PENDIENTE DE AGREGAR A PYTHON ANYWHERE
+
+
+class H_mensaje(models.Model):
+    id_mensaje = models.AutoField(primary_key = True, unique = True)
+    mensaje = models.CharField(max_length=1500)
+    #id_homenaje = models.ForeignKey(Homenajes, on_delete= models.CASCADE)
+
+class H_imagen(models.Model):
+    id_imagen = models.AutoField(primary_key = True, unique = True)
+    mensaje = models.CharField(max_length=200)
+    #id_homenaje = models.ForeignKey(Homenajes, on_delete= models.CASCADE)
+    imagen = models.ImageField(upload_to='h_imagen', max_length=200, null=True, blank=True)
+
+class H_video(models.Model):
+    id_video = models.AutoField(primary_key = True, unique = True)
+    mensaje = models.CharField(max_length=200)
+    #id_homenaje = models.ForeignKey(Homenajes, on_delete= models.CASCADE)
+    video = models.FileField(upload_to='h_video', max_length=200, null=True, blank=True)
+
+class H_audio(models.Model):
+    id_audio = models.AutoField(primary_key = True, unique = True)
+    mensaje = models.CharField(max_length=200)
+    audio = models.FileField(upload_to='h_audio', max_length=200, null=True, blank=True)
+
+class Homenajes(models.Model):
+    id_homenaje = models.AutoField(primary_key = True, unique = True)
+    id_usuario = models.ForeignKey(User,on_delete=models.CASCADE )
+    id_difunto = models.ForeignKey(Difunto, on_delete= models.CASCADE)
+    fecha_publicacion = models.DateField()
+    estado = models.BooleanField(default=True)
+    likes = models.IntegerField(default=0)
+    id_textcontent = models.ForeignKey(H_mensaje, on_delete= models.CASCADE, blank=True, null=True)
+    id_imagecontent = models.ForeignKey(H_imagen, on_delete= models.CASCADE, blank=True,null=True)
+    id_videocontent = models.ForeignKey(H_video, on_delete= models.CASCADE, blank=True, null=True)
+    id_audiocontent = models.ForeignKey(H_audio, on_delete= models.CASCADE, blank=True, null=True)
+
+class Historial_rosas(models.Model):
+    id_rosa = models.AutoField(primary_key = True, unique = True)
+    rosa = models.BooleanField(default= True)
+    id_usuario = models.ForeignKey(User, on_delete=models.CASCADE)
+    id_difunto = models.ForeignKey(Difunto, on_delete=models.CASCADE)
+    fecha_publicacion = models.DateField()
+
