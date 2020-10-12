@@ -23,6 +23,9 @@ Seguir los siguientes comandos, el 0001 es un ejemplo y dependera del valor que 
 ```bash
 python manage.py makemigrations
 python manage.py sqlmigrate serviciosBackend 0001
+python manage.py migrate serviciosBackend
+python manage.py migrate admin
+python manage.py migrate sessions
 python manage.py migrate
 ```
 # Crear el admin el django

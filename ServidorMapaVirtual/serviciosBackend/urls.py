@@ -5,6 +5,8 @@ from rest_framework.routers import DefaultRouter
 from serviciosBackend import views
 
 urlpatterns = [
+    path('get_token_facebook/', views.Create_User_Facebook.as_view()),
+
     path('camposantos/', views.CamposantoView.as_view()),
     path('camposanto/<str:pk>/', views.CamposantoViewSet.as_view()),
     path('red_social_post/', views.Red_socialPost.as_view()),
@@ -29,7 +31,22 @@ urlpatterns = [
     path('listar_permisos_general/', views. PermisoView.as_view()),
     path('mis_user_permisos/<str:id>/', views.User_PermisosGet.as_view()),
     path('user_permisos_post/', views.User_PermisosPost.as_view()),
+<<<<<<< HEAD
     path('permiso/<str:pk>/', views.Permiso_Info.as_view()),
+=======
+    #AGREGAR A PA
+    path('homenajes/<str:id>/', views.Homenaje_Get.as_view()),
+    path('homenajes_post/', views.Homenaje_Set.as_view()),
+    path('hmensaje/<str:id>/', views.Htexto_Get.as_view()),
+    path('himagen/<str:id>/', views.Himagen_Get.as_view()),
+    path('hmensaje_post/', views.Htexto_Set.as_view()),
+    path('himagen_post/', views.Himagen_Set.as_view()),
+    path('hvideo_post/', views.Hvideo_Set.as_view()),
+    path('haudio_post/', views.Haudio_Set.as_view()),
+    path('difunto/update-partial/<str:pk>/<str:num_rosas>/',views.AmountPartialUpdateView.as_view()),
+    path('historial_rosas/<str:id>/', views.Historial_rosasGet.as_view()),
+    path('historial_rosas_post/', views.Historial_rosasSet.as_view()),
+>>>>>>> aa7ba6cd2aa0457fc223e2152fc768feecad34e8
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)

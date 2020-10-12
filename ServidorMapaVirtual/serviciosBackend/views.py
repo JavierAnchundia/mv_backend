@@ -6,11 +6,15 @@ from rest_framework import status
 from rest_framework import viewsets
 from rest_framework.permissions import (AllowAny, IsAuthenticated)
 from .permissions import IsLoggedInUserOrAdmin, IsAdminUser
-from django.conf import settings
-from django.core.mail import send_mail
+from .servicioFacebook import Facebook
+from .get_jwt_user import Json_web_token
+from django.shortcuts import get_object_or_404
 
-from .models import User, Empresa, Red_social, Camposanto, Punto_geolocalizacion, Sector, Tipo_sepultura, Responsable_difunto, Difunto, Permiso, User_permisos
-from .serializers import UserProfileSerializer, EmpresaSerializer, Red_socialSerializer, CamposantoSerializer, Punto_geoSerializer, SectorSerializer, Tipo_sepulturaSerializer, Responsable_difuntoSerializer, DifuntoSerializer, PermisoSerializer, User_permisosSerializer
+from rest_framework.renderers import (HTMLFormRenderer,
+                                        JSONRenderer,
+                                        BrowsableAPIRenderer,)
+from .models import User, Empresa, Red_social, Camposanto, Punto_geolocalizacion, Sector, Tipo_sepultura, Responsable_difunto, Difunto, Permiso, User_permisos, Homenajes, H_mensaje, H_imagen, H_video, Historial_rosas, H_audio
+from .serializers import UserProfileSerializer, EmpresaSerializer, Red_socialSerializer, CamposantoSerializer, Punto_geoSerializer, SectorSerializer, Tipo_sepulturaSerializer, Responsable_difuntoSerializer, DifuntoSerializer, PermisoSerializer, User_permisosSerializer, HomenajeSerializer, H_mensajeSerializer, H_imagenSerializer, H_audioSerializer ,H_videoSerializer, HomenajeSimpleSerializer, Historial_rosasSerializer,Log_RosasSerializer
 
 '''API Rest get unico, get list, post y put para Camposanto'''
 class CamposantoView(APIView):
@@ -207,6 +211,7 @@ class EmpresaViewSet(APIView):
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 #     hasta aqui
+
 class UserViewSet(viewsets.ModelViewSet):
     # permission_classes = (IsAuthenticated,)
     queryset = User.objects.all()
@@ -320,3 +325,144 @@ class User_PermisosPost(APIView):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class Create_User_Facebook(APIView):
+    def post(self, request, format=None):
+        access_token = request.data['access_token']
+        # instancia de la clase facebook
+        f = Facebook()
+        # se obtienen los datos a traves de la api de facebook
+        data = f.get_info_facebook(access_token)
+        # instancia de la clase Json_web_token
+        jwt = Json_web_token()
+        # validar que no existe dicho usuarios guardado
+        usuario_validate = self.obtener_User(data['username'])
+
+        if usuario_validate:
+            token = jwt.get_token_user(usuario_validate)
+            return Response(token, status=status.HTTP_201_CREATED)
+        else:
+            user_serializer = UserProfileSerializer(data= data)
+            if user_serializer.is_valid():
+                user_save = user_serializer.save()
+                if user_save :
+                    # instancia de la clase Json_web_token
+                    jwt = Json_web_token()
+                    token = jwt.get_token_user(user_save)
+                return Response(token, status=status.HTTP_201_CREATED)
+            return Response(user_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def obtener_User(self, username):
+        try:
+            return User.objects.get(username = username)
+        except User.DoesNotExist:
+            return None
+
+#PENDIENTE DE AGREGAR A PA
+class Homenaje_Get(APIView):
+    def get(self, request, id, format=None):
+        user_homenajesObj = Homenajes.objects.filter(Q(id_difunto=id))
+        serializer = HomenajeSerializer(user_homenajesObj, many=True)
+        return Response(serializer.data)
+
+class Homenaje_Set(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    serializer_class = HomenajeSimpleSerializer
+    renderer_classes = (BrowsableAPIRenderer, JSONRenderer, HTMLFormRenderer)
+    def post(self, request, format=None):
+        serializer = HomenajeSimpleSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class Himagen_Get(APIView):
+    def get(self, request, id, format=None):
+        user_HimagenObj = H_imagen.objects.filter(Q(id_homenaje=id))
+        serializer = H_imagenSerializer(user_HimagenObj, many=True)
+        return Response(serializer.data)
+
+
+class Htexto_Get(APIView):
+    def get(self, request, id, format=None):
+        user_HtextoObj = H_mensaje.objects.filter(Q(id_homenaje=id))
+        serializer = H_mensajeSerializer(user_HtextoObj, many=True)
+        return Response(serializer.data)
+
+class Htexto_Set(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def post(self, request, format=None):
+        serializer = H_mensajeSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class Himagen_Set(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def post(self, request, format=None):
+        serializer = H_imagenSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class Hvideo_Set(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def post(self, request, format=None):
+        serializer = H_videoSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+# Obtener contenido de audio para homenaje
+class Haudio_Get(APIView):
+    def get(self, request, id, format=None):
+        Haudio_obj = H_audio.objects.filter(Q(id_homenaje=id))
+        serializer = H_audioSerializer(Haudio_obj, many=True)
+        return Response(serializer.data)
+
+# Crear contenido de audio para homenaje
+class Haudio_Set(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def post(self, request, format=None):
+        serializer = H_audioSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class AmountPartialUpdateView(APIView):
+
+    def patch(self, request, pk, num_rosas):
+        model = get_object_or_404(Difunto, pk=pk)
+        data = {"num_rosas": model.num_rosas + int(num_rosas)}
+        serializer = DifuntoSerializer(model, data=data, partial=True)
+
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class Historial_rosasGet(APIView):
+    def get(self, request, id, format=None):
+        historial_Obj = Historial_rosas.objects.filter(Q(id_difunto=id))
+        serializer = Log_RosasSerializer(historial_Obj, many=True)
+        return Response(serializer.data)
+
+class Historial_rosasSet(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def post(self, request, format=None):
+        serializer = Historial_rosasSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
