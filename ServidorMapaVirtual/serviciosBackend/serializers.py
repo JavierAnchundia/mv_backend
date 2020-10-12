@@ -64,7 +64,8 @@ class UserProfileSerializer(serializers.ModelSerializer):
             'direccion',
             'id_camposanto',
             'staff',
-            'tipo_usuario'
+            'tipo_usuario',
+            'is_active',
         )
         extra_kwargs = {'password': {'write_only': True}}
 

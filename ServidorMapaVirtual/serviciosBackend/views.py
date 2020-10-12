@@ -121,7 +121,7 @@ class DifuntoView(APIView):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
+    
 class DifuntoViewSet(APIView):
     def get_object(self, pk):
         try:
@@ -171,6 +171,15 @@ class Responsable_difuntoViewSet(APIView):
         responsableObj = self.get_object(id_difunto)
         serializer = Responsable_difuntoSerializer(responsableObj)
         return Response(serializer.data)
+    
+    def put(self, request, id_difunto, format=None):
+        responsableObj = self.get_object(id_difunto)
+        serializer = Responsable_difuntoSerializer(responsableObj, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 '''API Rest get list y get id para empresa'''
 class EmpresasView(APIView):
@@ -228,13 +237,15 @@ class UsuarioViewGet(APIView):
         serializer = UserProfileSerializer(usuarioObj)
         return Response(serializer.data)
     # parte nueva para actualizar usuario seteando el password
-    def put(self, request, email, format = None):
-        usuarioObj = self.get_object(email)
-        if(request.data['password']):
-            new_password = request.data['password']
-            usuarioObj.set_password(new_password)
-            request.data['password'] = usuarioObj.password
-        serializer = UserProfileSerializer(usuarioObj, data=request.data)
+    def put(self, request, username, format = None):
+        usuarioObj = self.get_object(username)
+        print("Dentro del Put bruh")
+        if 'password' in request.data:
+            if(request.data['password']):
+                new_password = request.data['password']
+                usuarioObj.set_password(new_password)
+                request.data['password'] = usuarioObj.password
+        serializer = UserProfileSerializer(usuarioObj, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
@@ -270,11 +281,34 @@ class PermisoView(APIView):
         serializer = PermisoSerializer(permisoObj, many=True)
         return Response(serializer.data)
 
+    
 # Obtener permisos de un usuario
 class User_PermisosGet(APIView):
+    def get_object(self, pk):
+        try:
+            return User_permisos.objects.get(id_difunto=pk)
+        except Difunto.DoesNotExist:
+            raise Http404
+
     def get(self, request, id, format=None):
         user_permisosObj = User_permisos.objects.filter(Q(id_user=id))
         serializer = User_permisosSerializer(user_permisosObj, many=True)
+        return Response(serializer.data)
+
+    def delete(self, request, id, format=None):
+        user_permisosObj = (User_permisos.objects.filter(Q(id_user=id))).delete()
+        return Response(user_permisosObj)
+
+class Permiso_Info(APIView):
+    def get_object(self,pk):
+        try:
+            return Permiso.objects.get(id_permiso=pk)
+        except Permiso.DoesNotExist:
+            raise Http404
+
+    def get(self, request, pk):
+        permisoObj = self.get_object(pk)
+        serializer = PermisoSerializer(permisoObj)
         return Response(serializer.data)
 
 # Crear usuarios con sus respectivos permisos

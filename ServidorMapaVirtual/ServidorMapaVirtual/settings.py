@@ -118,7 +118,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'MapaVirtual',
         'USER': 'root',
-        'PASSWORD' : 'toby',
+        'PASSWORD' : 'Lamoriel17',
         'HOST': 'localhost',
         'PORT': '3306',
     }
