@@ -126,23 +126,7 @@ class DifuntoView(APIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
-class DifuntoViewSet(APIView):
-    def get_object(self, pk):
-        try:
-            return Difunto.objects.get(id_difunto=pk)
-        except Difunto.DoesNotExist:
-            raise Http404
-    def get(self, request, pk, format=None):
-        difuntoObj = self.get_object(pk)
-        serializer = DifuntoSerializer(difuntoObj)
-        return Response(serializer.data)
-    def put(self, request, pk, format=None):
-        difuntoObj = self.get_object(pk)
-        serializer = DifuntoSerializer(difuntoObj, data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 class DifuntoListGet(APIView):
     def get(self, request, id_camp, format=None):
@@ -230,31 +214,6 @@ class UserViewSet(viewsets.ModelViewSet):
             permission_classes = [IsAdminUser]
         return [permission() for permission in permission_classes]
 
-class UsuarioViewGet(APIView):
-    permission_classes = (IsAuthenticated,)
-    def get_object(self, username):
-        try:
-            return User.objects.get(username=username)
-        except User.DoesNotExist:
-            raise Http404
-    def get(self, request, username, format=None):
-        usuarioObj = self.get_object(username)
-        serializer = UserProfileSerializer(usuarioObj)
-        return Response(serializer.data)
-    # parte nueva para actualizar usuario seteando el password
-    def put(self, request, username, format = None):
-        usuarioObj = self.get_object(username)
-        print("Dentro del Put bruh")
-        if 'password' in request.data:
-            if(request.data['password']):
-                new_password = request.data['password']
-                usuarioObj.set_password(new_password)
-                request.data['password'] = usuarioObj.password
-        serializer = UserProfileSerializer(usuarioObj, data=request.data, partial=True)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 # obtener lista de usuarios por camposanto
 class UsuarioGetCamposanto(APIView):
@@ -287,34 +246,7 @@ class PermisoView(APIView):
         return Response(serializer.data)
 
     
-# Obtener permisos de un usuario
-class User_PermisosGet(APIView):
-    def get_object(self, pk):
-        try:
-            return User_permisos.objects.get(id_difunto=pk)
-        except Difunto.DoesNotExist:
-            raise Http404
 
-    def get(self, request, id, format=None):
-        user_permisosObj = User_permisos.objects.filter(Q(id_user=id))
-        serializer = User_permisosSerializer(user_permisosObj, many=True)
-        return Response(serializer.data)
-
-    def delete(self, request, id, format=None):
-        user_permisosObj = (User_permisos.objects.filter(Q(id_user=id))).delete()
-        return Response(user_permisosObj)
-
-class Permiso_Info(APIView):
-    def get_object(self,pk):
-        try:
-            return Permiso.objects.get(id_permiso=pk)
-        except Permiso.DoesNotExist:
-            raise Http404
-
-    def get(self, request, pk):
-        permisoObj = self.get_object(pk)
-        serializer = PermisoSerializer(permisoObj)
-        return Response(serializer.data)
 
 # Crear usuarios con sus respectivos permisos
 class User_PermisosPost(APIView):
@@ -358,7 +290,83 @@ class Create_User_Facebook(APIView):
         except User.DoesNotExist:
             return None
 
-#PENDIENTE DE AGREGAR A PA
+#PENDIENTE DE AGREGAR A PA #################################################################################################
+
+#Este VIEW es todo nuevo
+class Permiso_Info(APIView):
+    def get_object(self,pk):
+        try:
+            return Permiso.objects.get(id_permiso=pk)
+        except Permiso.DoesNotExist:
+            raise Http404
+
+    def get(self, request, pk):
+        permisoObj = self.get_object(pk)
+        serializer = PermisoSerializer(permisoObj)
+        return Response(serializer.data)
+
+# Obtener permisos de un usuario // Cambie el algo del metodo get_object y anadi el metodo delete
+class User_PermisosGet(APIView):
+    def get_object(self, pk):
+        try:
+            return User_permisos.objects.get(id_difunto=pk)
+        except Difunto.DoesNotExist:
+            raise Http404
+
+    def get(self, request, id, format=None):
+        user_permisosObj = User_permisos.objects.filter(Q(id_user=id))
+        serializer = User_permisosSerializer(user_permisosObj, many=True)
+        return Response(serializer.data)
+
+    def delete(self, request, id, format=None):
+        user_permisosObj = (User_permisos.objects.filter(Q(id_user=id))).delete()
+        return Response(user_permisosObj)
+
+
+class UsuarioViewGet(APIView):
+    permission_classes = (IsAuthenticated,)
+    def get_object(self, username):
+        try:
+            return User.objects.get(username=username)
+        except User.DoesNotExist:
+            raise Http404
+    def get(self, request, username, format=None):
+        usuarioObj = self.get_object(username)
+        serializer = UserProfileSerializer(usuarioObj)
+        return Response(serializer.data)
+    # parte nueva para actualizar usuario seteando el password, este metodo se incluye en lo del PythonAnyWhere
+    def put(self, request, username, format = None):
+        usuarioObj = self.get_object(username)
+        if 'password' in request.data:
+            if(request.data['password']):
+                new_password = request.data['password']
+                usuarioObj.set_password(new_password)
+                request.data['password'] = usuarioObj.password
+        serializer = UserProfileSerializer(usuarioObj, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class DifuntoViewSet(APIView):
+    def get_object(self, pk):
+        try:
+            return Difunto.objects.get(id_difunto=pk)
+        except Difunto.DoesNotExist:
+            raise Http404
+    def get(self, request, pk, format=None):
+        difuntoObj = self.get_object(pk)
+        serializer = DifuntoSerializer(difuntoObj)
+        return Response(serializer.data)
+    #Aqui es el meotod PUT lo nuevo
+    def put(self, request, pk, format=None):
+        difuntoObj = self.get_object(pk)
+        serializer = DifuntoSerializer(difuntoObj, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 class Homenaje_Get(APIView):
     def get(self, request, id, format=None):
         user_homenajesObj = Homenajes.objects.filter(Q(id_difunto=id))

@@ -49,58 +49,6 @@ class DifuntoSerializer(serializers.ModelSerializer):
         model = Difunto
         fields = '__all__'
 
-class UserProfileSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = (
-            'id',
-            'first_name',
-            'last_name',
-            'email',
-            'username',
-            'password',
-            'telefono',
-            'is_facebook',
-            'genero',
-            'direccion',
-            'id_camposanto',
-            'staff',
-            'tipo_usuario',
-            'is_active',
-        )
-        extra_kwargs = {'password': {'write_only': True}}
-
-    def create(self, validated_data):
-        password = validated_data.pop('password')
-        user = User(**validated_data)
-        user.username = validated_data.get('username')
-        user.set_password(password)
-        validar = user.save()
-        if(validar == None):
-            camposanto = self.obtener_camposanto(user)
-            self.send_email(user, camposanto)
-        return user
-
-    def obtener_camposanto(self, usuario):
-        retorno = ''
-        camposanto = usuario.id_camposanto
-        if(camposanto):
-            nombreCamposanto = camposanto.nombre
-            retorno = nombreCamposanto
-        return retorno
-
-    def send_email(self, usuario, camposanto):
-        subject = '¡Bienvenido a Mapa Virtual!'
-        if(camposanto and usuario.first_name and usuario.last_name):
-            message = '¡Te damos la bienvenida a mapa virtual! \n'\
-                      'Hola ' + usuario.first_name + ' ' + usuario.last_name+',\n'\
-                      'Gracias por unirte a '+ camposanto +'.\n' \
-                      '\nExplora nuestra página y conoce más novedades. '
-        else:
-            message = 'Bienvenido '+ usuario.email +', gracias por registrarse !!'
-        email_from = settings.EMAIL_HOST_USER
-        recipient_list = [usuario.email, ]
-        send_mail(subject, message, email_from, recipient_list)
 
 class PermisoSerializer(serializers.ModelSerializer):
     class Meta:
@@ -162,3 +110,57 @@ class Log_RosasSerializer(serializers.ModelSerializer):
     class Meta:
         model = Historial_rosas
         fields = '__all__'
+
+#Este Serializer se debe anadir, cambié uno de los fields
+class UserProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = (
+            'id',
+            'first_name',
+            'last_name',
+            'email',
+            'username',
+            'password',
+            'telefono',
+            'is_facebook',
+            'genero',
+            'direccion',
+            'id_camposanto',
+            'staff',
+            'tipo_usuario',
+            'is_active',
+        )
+        extra_kwargs = {'password': {'write_only': True}}
+
+    def create(self, validated_data):
+        password = validated_data.pop('password')
+        user = User(**validated_data)
+        user.username = validated_data.get('username')
+        user.set_password(password)
+        validar = user.save()
+        if(validar == None):
+            camposanto = self.obtener_camposanto(user)
+            self.send_email(user, camposanto)
+        return user
+
+    def obtener_camposanto(self, usuario):
+        retorno = ''
+        camposanto = usuario.id_camposanto
+        if(camposanto):
+            nombreCamposanto = camposanto.nombre
+            retorno = nombreCamposanto
+        return retorno
+
+    def send_email(self, usuario, camposanto):
+        subject = '¡Bienvenido a Mapa Virtual!'
+        if(camposanto and usuario.first_name and usuario.last_name):
+            message = '¡Te damos la bienvenida a mapa virtual! \n'\
+                      'Hola ' + usuario.first_name + ' ' + usuario.last_name+',\n'\
+                      'Gracias por unirte a '+ camposanto +'.\n' \
+                      '\nExplora nuestra página y conoce más novedades. '
+        else:
+            message = 'Bienvenido '+ usuario.email +', gracias por registrarse !!'
+        email_from = settings.EMAIL_HOST_USER
+        recipient_list = [usuario.email, ]
+        send_mail(subject, message, email_from, recipient_list)

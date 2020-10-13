@@ -31,9 +31,6 @@ urlpatterns = [
     path('listar_permisos_general/', views. PermisoView.as_view()),
     path('mis_user_permisos/<str:id>/', views.User_PermisosGet.as_view()),
     path('user_permisos_post/', views.User_PermisosPost.as_view()),
-<<<<<<< HEAD
-    path('permiso/<str:pk>/', views.Permiso_Info.as_view()),
-=======
     #AGREGAR A PA
     path('homenajes/<str:id>/', views.Homenaje_Get.as_view()),
     path('homenajes_post/', views.Homenaje_Set.as_view()),
@@ -46,7 +43,8 @@ urlpatterns = [
     path('difunto/update-partial/<str:pk>/<str:num_rosas>/',views.AmountPartialUpdateView.as_view()),
     path('historial_rosas/<str:id>/', views.Historial_rosasGet.as_view()),
     path('historial_rosas_post/', views.Historial_rosasSet.as_view()),
->>>>>>> aa7ba6cd2aa0457fc223e2152fc768feecad34e8
+    path('permiso/<str:pk>/', views.Permiso_Info.as_view()),
+
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)
