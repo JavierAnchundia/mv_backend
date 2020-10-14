@@ -62,56 +62,6 @@ class User_permisosSerializer(serializers.ModelSerializer):
 
 #PENDIENTE DE AGREGAR A PYTHON ANYWHERE
 
-
-class H_mensajeSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = H_mensaje
-        fields = '__all__'
-
-class H_imagenSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = H_imagen
-        fields = '__all__'
-
-class H_videoSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = H_video
-        fields = '__all__'
-
-class H_audioSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = H_audio
-        fields = '__all__'
-
-class HomenajeSerializer(serializers.ModelSerializer):
-    id_usuario = UserProfileSerializer()
-    id_difunto = DifuntoSerializer(required=False)
-    id_textcontent = H_mensajeSerializer(required=False)
-    id_imagecontent = H_imagenSerializer(required=False)
-    id_videocontent = H_videoSerializer(required=False)
-    id_audiocontent = H_audioSerializer(required=False)
-
-    class Meta:
-        model = Homenajes
-        fields = '__all__'
-
-class HomenajeSimpleSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Homenajes
-        fields = '__all__'
-
-class Historial_rosasSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Historial_rosas
-        fields = '__all__'
-
-class Log_RosasSerializer(serializers.ModelSerializer):
-    id_usuario = UserProfileSerializer()
-    class Meta:
-        model = Historial_rosas
-        fields = '__all__'
-
-#Este Serializer se debe anadir, cambié uno de los fields
 class UserProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
@@ -164,3 +114,54 @@ class UserProfileSerializer(serializers.ModelSerializer):
         email_from = settings.EMAIL_HOST_USER
         recipient_list = [usuario.email, ]
         send_mail(subject, message, email_from, recipient_list)
+        
+class H_mensajeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = H_mensaje
+        fields = '__all__'
+
+class H_imagenSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = H_imagen
+        fields = '__all__'
+
+class H_videoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = H_video
+        fields = '__all__'
+
+class H_audioSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = H_audio
+        fields = '__all__'
+
+class HomenajeSerializer(serializers.ModelSerializer):
+    id_usuario = UserProfileSerializer()
+    id_difunto = DifuntoSerializer(required=False)
+    id_textcontent = H_mensajeSerializer(required=False)
+    id_imagecontent = H_imagenSerializer(required=False)
+    id_videocontent = H_videoSerializer(required=False)
+    id_audiocontent = H_audioSerializer(required=False)
+
+    class Meta:
+        model = Homenajes
+        fields = '__all__'
+
+class HomenajeSimpleSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Homenajes
+        fields = '__all__'
+
+class Historial_rosasSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Historial_rosas
+        fields = '__all__'
+
+class Log_RosasSerializer(serializers.ModelSerializer):
+    id_usuario = UserProfileSerializer()
+    class Meta:
+        model = Historial_rosas
+        fields = '__all__'
+
+#Este Serializer se debe anadir, cambié uno de los fields
+
