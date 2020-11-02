@@ -337,14 +337,13 @@ class UsuarioViewGet(APIView):
     # parte nueva para actualizar usuario seteando el password, este metodo se incluye en lo del PythonAnyWhere
     def put(self, request, username, format = None):
         usuarioObj = self.get_object(username)
-        if 'password' in request.data:
-            if(request.data['password']):
-                new_password = request.data['password']
-                usuarioObj.set_password(new_password)
-                request.data['password'] = usuarioObj.password
         serializer = UserProfileSerializer(usuarioObj, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
+
+            if 'password' in request.data:
+                usuarioObj.set_password(request.data['password'])
+                usuarioObj.save()
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 

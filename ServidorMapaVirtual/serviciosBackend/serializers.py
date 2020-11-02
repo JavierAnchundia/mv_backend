@@ -81,7 +81,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
             'tipo_usuario',
             'is_active',
         )
-        extra_kwargs = {'password': {'write_only': True}}
+        #extra_kwargs = {'password': {'write_only': True}}
 
     def create(self, validated_data):
         password = validated_data.pop('password')
@@ -113,7 +113,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
             message = 'Bienvenido '+ usuario.email +', gracias por registrarse !!'
         email_from = settings.EMAIL_HOST_USER
         recipient_list = [usuario.email, ]
-        send_mail(subject, message, email_from, recipient_list)
+        send_mail(subject, message, email_from,     )
         
 class H_mensajeSerializer(serializers.ModelSerializer):
     class Meta:
