@@ -2,7 +2,7 @@ from django.urls import path
 from django.conf.urls import include
 from rest_framework.urlpatterns import format_suffix_patterns
 from rest_framework.routers import DefaultRouter
-from ServidorMapaVirtual.serviciosBackend import views
+from serviciosBackend import views
 
 urlpatterns = [
     path('camposantos/', views.CamposantoView.as_view()),

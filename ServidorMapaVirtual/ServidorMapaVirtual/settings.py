@@ -13,6 +13,9 @@ import os
 from pathlib import Path
 from datetime import timedelta
 
+from dotenv import load_dotenv
+load_dotenv()
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 # BASE_DIR = Path(__file__).resolve(strict=True).parent.parent
 from django.conf.global_settings import DATA_UPLOAD_MAX_MEMORY_SIZE
@@ -120,7 +123,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'MapaVirtual',
         'USER': 'root',
-        'PASSWORD' : 'Lamoriel17',
+        'PASSWORD' : 'toby',
         'HOST': 'localhost',
         'PORT': '3306',
     }
@@ -242,5 +245,5 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'mapa.virtual.bryan@gmail.com'
-EMAIL_HOST_PASSWORD = 'mronvjpzbtgwckwe'
+EMAIL_HOST_USER = os.getenv("EMAIL")
+EMAIL_HOST_PASSWORD = os.getenv("PASSWORDEMAIL")
