@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import User, Empresa, Red_social, Camposanto, Punto_geolocalizacion, Sector, Tipo_sepultura, Responsable_difunto, Difunto, Permiso, User_permisos
+from .models import User, Empresa, Red_social, Camposanto, Punto_geolocalizacion, Sector, Tipo_sepultura, Responsable_difunto, Difunto, Permiso, User_permisos, Homenaje
 from django.conf import settings
 from django.core.mail import send_mail
 
@@ -60,6 +60,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
             'username',
             'password',
             'telefono',
+            'image_perfil',
             'is_facebook',
             'genero',
             'direccion',
@@ -67,17 +68,18 @@ class UserProfileSerializer(serializers.ModelSerializer):
             'staff',
             'tipo_usuario'
         )
-        extra_kwargs = {'password': {'write_only': True}}
+        # extra_kwargs = {'password': {'write_only': True }}
 
     def create(self, validated_data):
+        print('imagen' in validated_data)
         password = validated_data.pop('password')
         user = User(**validated_data)
         user.username = validated_data.get('username')
         user.set_password(password)
-        validar = user.save()
-        if(validar == None):
-            camposanto = self.obtener_camposanto(user)
-            self.send_email(user, camposanto)
+        # validar = user.save()
+        # if(validar == None):
+        #     camposanto = self.obtener_camposanto(user)
+        #     self.send_email(user, camposanto)
         return user
 
     def obtener_camposanto(self, usuario):
@@ -109,4 +111,9 @@ class PermisoSerializer(serializers.ModelSerializer):
 class User_permisosSerializer(serializers.ModelSerializer):
     class Meta:
         model = User_permisos
+        fields = '__all__'
+
+class HomenajeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Homenaje
         fields = '__all__'

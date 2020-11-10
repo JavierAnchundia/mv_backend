@@ -31,6 +31,7 @@ urlpatterns = [
     path('listar_permisos_general/', views. PermisoView.as_view()),
     path('mis_user_permisos/<str:id>/', views.User_PermisosGet.as_view()),
     path('user_permisos_post/', views.User_PermisosPost.as_view()),
+    path('update_image/<str:id>/', views.ImageUserUpdate.as_view()),
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)

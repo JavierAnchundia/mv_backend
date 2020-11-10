@@ -8,10 +8,12 @@ from rest_framework.permissions import (AllowAny, IsAuthenticated)
 from .permissions import IsLoggedInUserOrAdmin, IsAdminUser
 from .servicioFacebook import Facebook
 from .get_jwt_user import Json_web_token
-
-from .models import User, Empresa, Red_social, Camposanto, Punto_geolocalizacion, Sector, Tipo_sepultura, Responsable_difunto, Difunto, Permiso, User_permisos
-from .serializers import UserProfileSerializer, EmpresaSerializer, Red_socialSerializer, CamposantoSerializer, Punto_geoSerializer, SectorSerializer, Tipo_sepulturaSerializer, Responsable_difuntoSerializer, DifuntoSerializer, PermisoSerializer, User_permisosSerializer
-
+import base64
+from django.core.files.base import ContentFile
+from .models import User, Empresa, Red_social, Camposanto, Punto_geolocalizacion, Sector, Tipo_sepultura, Responsable_difunto, Difunto, Permiso, User_permisos, Homenaje
+from .serializers import UserProfileSerializer, EmpresaSerializer, Red_socialSerializer, CamposantoSerializer, Punto_geoSerializer, SectorSerializer, Tipo_sepulturaSerializer, Responsable_difuntoSerializer, DifuntoSerializer, PermisoSerializer, User_permisosSerializer, HomenajeSerializer
+from django.core.files.storage import default_storage
+import os
 '''API Rest get unico, get list, post y put para Camposanto'''
 class CamposantoView(APIView):
     permission_classes = (IsAuthenticated,)
@@ -261,6 +263,7 @@ class UsuarioGetAll(APIView):
             userO.direccion = ''
             userO.staff = ''
             userO.tipo_usuario = ''
+            userO.password = ''
         serializer = UserProfileSerializer(usuarioObj, many=True)
         return Response(serializer.data)
 
@@ -288,6 +291,7 @@ class User_PermisosPost(APIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+# Api para crear usuario de facebook o validar que existe para enviar el token
 class Create_User_Facebook(APIView):
     def post(self, request, format=None):
         access_token = request.data['access_token']
@@ -319,3 +323,30 @@ class Create_User_Facebook(APIView):
             return User.objects.get(username = username)
         except User.DoesNotExist:
             return None
+
+
+class ImageUserUpdate(APIView):
+    # permission_classes = (IsAuthenticated,)
+    def get_object(self, id):
+        try:
+            return User.objects.get(id=id)
+        except User.DoesNotExist:
+            raise Http404
+    def put(self, request, id, format=None):
+        usuarioObj = self.get_object(id)
+        if ('img_base64' in request.data):
+            format, imgstr = request.data['img_base64'].split(';base64,')
+            ext = format.split('/')[-1]
+            nameFile = UserProfileSerializer(usuarioObj)['username'].value + "-" + request.data['nombre_file']
+            imag = ContentFile(base64.b64decode(imgstr), name=nameFile)
+            # del request.data['password']
+            del request.data['img_base64']
+            del request.data['nombre_file']
+            request.data['image_perfil'] = imag
+            print(UserProfileSerializer(usuarioObj))
+            serializer = UserProfileSerializer(usuarioObj, data = request.data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response(serializer.errors,  status=status.HTTP_400_BAD_REQUEST)
+

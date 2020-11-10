@@ -122,8 +122,9 @@ class User(AbstractBaseUser):
     email = models.EmailField(_('email address'), max_length=200, default=None, null=True, blank=True)
     # se debe cambiar que el username es requerido
     username = models.CharField(max_length=50, unique=True, default=None, null=True, blank=True)
-    password = models.CharField(max_length=100)
+    password = models.CharField(max_length=100, default=None, null=True, blank=True)
     telefono = models.CharField(max_length=10, default=None, null=True, blank=True)
+    image_perfil = models.ImageField(upload_to='perfil', max_length=500, default=None, null=True, blank=True)
     is_facebook = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
     genero = models.CharField(max_length=15, default=None, null=True, blank=True)
@@ -158,3 +159,5 @@ class User_permisos(models.Model):
     id_user_permiso = models.AutoField(primary_key=True, unique=True)
     id_user = models.ForeignKey(User, on_delete=models.CASCADE)
     id_permiso = models.ForeignKey(Permiso, on_delete=models.CASCADE)
+
+

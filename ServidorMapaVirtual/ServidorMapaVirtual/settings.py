@@ -15,8 +15,10 @@ from datetime import timedelta
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 # BASE_DIR = Path(__file__).resolve(strict=True).parent.parent
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+from django.conf.global_settings import DATA_UPLOAD_MAX_MEMORY_SIZE
 
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+DATA_UPLOAD_MAX_MEMORY_SIZE = 10485760
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/
 
@@ -47,7 +49,7 @@ CORS_ORIGIN_WHITELIST = [
   'http://localhost:4200',
   'http://localhost:8000',
   'http://localhost:8100',
-    'http://192.168.0.112:8100'
+    'http://192.168.0.112:8100',
 ]
 ALLOWED_HOSTS = ['192.168.0.112', 'localhost', '127.0.0.1']
 CORS_ALLOW_METHODS = [
@@ -208,7 +210,7 @@ AUTHENTICATION_BACKENDS = (
 
 #configuraciones por default para el token
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=180),
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=1),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
     'ROTATE_REFRESH_TOKENS': False,
     'BLACKLIST_AFTER_ROTATION': True,
