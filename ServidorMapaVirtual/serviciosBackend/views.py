@@ -6,14 +6,18 @@ from rest_framework import status
 from rest_framework import viewsets
 from rest_framework.permissions import (AllowAny, IsAuthenticated)
 from .permissions import IsLoggedInUserOrAdmin, IsAdminUser
+from django.shortcuts import get_object_or_404
+from rest_framework.renderers import (HTMLFormRenderer, JSONRenderer,BrowsableAPIRenderer,)
+from .models import User, Empresa, Red_social, Camposanto, Punto_geolocalizacion, Sector, Tipo_sepultura, Responsable_difunto, Difunto, Permiso, User_permisos, Homenajes, H_mensaje, H_imagen, H_video, H_audio, Historial_rosas
+from .serializers import UserProfileSerializer, EmpresaSerializer, Red_socialSerializer, CamposantoSerializer, Punto_geoSerializer, SectorSerializer, Tipo_sepulturaSerializer, Responsable_difuntoSerializer, DifuntoSerializer, PermisoSerializer, User_permisosSerializer, HomenajeSerializer, H_mensajeSerializer, H_imagenSerializer, H_videoSerializer, H_audioSerializer,HomenajeSimpleSerializer, Historial_rosasSerializer,Log_RosasSerializer
 from .servicioFacebook import Facebook
 from .get_jwt_user import Json_web_token
 import base64
 from django.core.files.base import ContentFile
-from .models import User, Empresa, Red_social, Camposanto, Punto_geolocalizacion, Sector, Tipo_sepultura, Responsable_difunto, Difunto, Permiso, User_permisos, Homenaje
-from .serializers import UserProfileSerializer, EmpresaSerializer, Red_socialSerializer, CamposantoSerializer, Punto_geoSerializer, SectorSerializer, Tipo_sepulturaSerializer, Responsable_difuntoSerializer, DifuntoSerializer, PermisoSerializer, User_permisosSerializer, HomenajeSerializer
+
+# prueba eliminar file
 from django.core.files.storage import default_storage
-import os
+
 '''API Rest get unico, get list, post y put para Camposanto'''
 class CamposantoView(APIView):
     permission_classes = (IsAuthenticated,)
@@ -124,6 +128,7 @@ class DifuntoView(APIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+#API para obtener la informacion de un difunto y actualizarla
 class DifuntoViewSet(APIView):
     def get_object(self, pk):
         try:
@@ -134,6 +139,7 @@ class DifuntoViewSet(APIView):
         difuntoObj = self.get_object(pk)
         serializer = DifuntoSerializer(difuntoObj)
         return Response(serializer.data)
+
     def put(self, request, pk, format=None):
         difuntoObj = self.get_object(pk)
         serializer = DifuntoSerializer(difuntoObj, data=request.data)
@@ -174,6 +180,23 @@ class Responsable_difuntoViewSet(APIView):
         serializer = Responsable_difuntoSerializer(responsableObj)
         return Response(serializer.data)
 
+    def put(self, request, id_difunto, format=None):
+        responsableObj = self.get_object(id_difunto)
+        serializer = Responsable_difuntoSerializer(responsableObj, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+'''API Rest post para Usuario'''
+# class Usuario_post(APIView):
+#     def post(self, request, format=None):
+#         serializer = UsuarioSerializer(data=request.data)
+#         if serializer.is_valid():
+#             serializer.save()
+#             return Response(serializer.data, status=status.HTTP_201_CREATED)
+#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 '''API Rest get list y get id para empresa'''
 class EmpresasView(APIView):
     def get(self, request, format=None):
@@ -191,7 +214,6 @@ class EmpresaViewSet(APIView):
         empresaObj = self.get_object(pk)
         serializer = EmpresaSerializer(empresaObj)
         return Response(serializer.data)
-    # el siguiente metodo se debe incluir
     def put(self, request, pk, format=None):
         empresaObj = self.get_object(pk)
         serializer = EmpresaSerializer(empresaObj, data=request.data)
@@ -199,7 +221,7 @@ class EmpresaViewSet(APIView):
             serializer.save()
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-#     hasta aqui
+
 
 class UserViewSet(viewsets.ModelViewSet):
     # permission_classes = (IsAuthenticated,)
@@ -212,13 +234,13 @@ class UserViewSet(viewsets.ModelViewSet):
             permission_classes = [AllowAny ]
         if self.action == 'create':
             permission_classes = [AllowAny]
-
         elif self.action == 'retrieve' or self.action == 'update' or self.action == 'partial_update':
             permission_classes = [IsLoggedInUserOrAdmin]
         elif self.action == 'list' or self.action == 'destroy':
             permission_classes = [IsAdminUser]
         return [permission() for permission in permission_classes]
 
+#Para poder obtener informacion de un usuario y poder actualizarlo
 class UsuarioViewGet(APIView):
     permission_classes = (IsAuthenticated,)
     def get_object(self, username):
@@ -230,16 +252,16 @@ class UsuarioViewGet(APIView):
         usuarioObj = self.get_object(username)
         serializer = UserProfileSerializer(usuarioObj)
         return Response(serializer.data)
-    # parte nueva para actualizar usuario seteando el password
-    def put(self, request, email, format = None):
-        usuarioObj = self.get_object(email)
-        if(request.data['password']):
-            new_password = request.data['password']
-            usuarioObj.set_password(new_password)
-            request.data['password'] = usuarioObj.password
-        serializer = UserProfileSerializer(usuarioObj, data=request.data)
+
+    def put(self, request, username, format = None):
+        usuarioObj = self.get_object(username)
+        serializer = UserProfileSerializer(usuarioObj, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
+
+            if 'password' in request.data:
+                usuarioObj.set_password(request.data['password'])
+                usuarioObj.save()
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -263,7 +285,6 @@ class UsuarioGetAll(APIView):
             userO.direccion = ''
             userO.staff = ''
             userO.tipo_usuario = ''
-            userO.password = ''
         serializer = UserProfileSerializer(usuarioObj, many=True)
         return Response(serializer.data)
 
@@ -274,12 +295,36 @@ class PermisoView(APIView):
         serializer = PermisoSerializer(permisoObj, many=True)
         return Response(serializer.data)
 
-# Obtener permisos de un usuario
+# Obtener la informacion de un Permiso usando su id
+class Permiso_Info(APIView):
+    def get_object(self,pk):
+        try:
+            return Permiso.objects.get(id_permiso=pk)
+        except Permiso.DoesNotExist:
+            raise Http404
+
+    def get(self, request, pk):
+        permisoObj = self.get_object(pk)
+        serializer = PermisoSerializer(permisoObj)
+        return Response(serializer.data)
+
+# Obtener permisos de un usuario o eliminar los permisos de un usuario
 class User_PermisosGet(APIView):
+
+    def get_object(self, pk):
+        try:
+            return User_permisos.objects.get(id_difunto=pk)
+        except Difunto.DoesNotExist:
+            raise Http404
+
     def get(self, request, id, format=None):
         user_permisosObj = User_permisos.objects.filter(Q(id_user=id))
         serializer = User_permisosSerializer(user_permisosObj, many=True)
         return Response(serializer.data)
+
+    def delete(self, request, id, format=None):
+        user_permisosObj = (User_permisos.objects.filter(Q(id_user=id))).delete()
+        return Response(user_permisosObj)
 
 # Crear usuarios con sus respectivos permisos
 class User_PermisosPost(APIView):
@@ -324,9 +369,194 @@ class Create_User_Facebook(APIView):
         except User.DoesNotExist:
             return None
 
+# Obtener homenajes por id de difunto
+class Homenaje_Get(APIView):
+    def get(self, request, id, format=None):
+        user_homenajesObj = Homenajes.objects.filter(Q(id_difunto=id))
+        serializer = HomenajeSerializer(user_homenajesObj, many=True)
+        return Response(serializer.data)
 
+# Crear Homenaje
+class Homenaje_Set(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    serializer_class = HomenajeSimpleSerializer
+    renderer_classes = (BrowsableAPIRenderer, JSONRenderer, HTMLFormRenderer)
+    def post(self, request, format=None):
+        serializer = HomenajeSimpleSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+# Obtener contenido de imagen para homenaje
+class Himagen_Get(APIView):
+    def get(self, request, id, format=None):
+        user_HimagenObj = H_imagen.objects.filter(Q(id_homenaje=id))
+        serializer = H_imagenSerializer(user_HimagenObj, many=True)
+        return Response(serializer.data)
+
+#Borrado de homenaje imagen
+class HImagen_Delete(APIView):
+    def get_object(self, id):
+        try:
+            return H_imagen.objects.get(id_imagen=id)
+        except H_imagen.DoesNotExist:
+            raise Http404
+    def delete(self, request, id_imagen, format=None):
+        imgObj = self.get_object(id_imagen)
+        seri = H_imagenSerializer(imgObj)
+        path = seri['imagen'].value[7:]
+        imgObj.delete()
+        default_storage.delete(path)
+        return Response(status=status.HTTP_200_OK)
+
+# Obtener contenido de texto para homenaje
+class Htexto_Get(APIView):
+    def get(self, request, id, format=None):
+        user_HtextoObj = H_mensaje.objects.filter(Q(id_homenaje=id))
+        serializer = H_mensajeSerializer(user_HtextoObj, many=True)
+        return Response(serializer.data)
+
+#Borrado de homenaje texto
+class HTexto_Delete(APIView):
+    def get_object(self, id):
+        try:
+            return H_mensaje.objects.get(id_mensaje=id)
+        except H_mensaje.DoesNotExist:
+            raise Http404
+    def delete(self, request, id_mensaje, format=None):
+        mensajeObj = self.get_object(id_mensaje)
+        mensajeObj.delete()
+        return Response(status=status.HTTP_200_OK)
+
+# Crear contenido de texto para homenaje
+class Htexto_Set(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def post(self, request, format=None):
+        serializer = H_mensajeSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+# Crear contenido de imagen para homenaje
+class Himagen_Set(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def post(self, request, format=None):
+        # base_img = 'data:image/png;base64'
+        if(request.data['img_base64'] != "none"):
+            format, imgstr = request.data['img_base64'].split(';base64,')
+            ext = format.split('/')[-1]
+            imag = ContentFile(base64.b64decode(imgstr), name='h_img_' + request.data['nombre_file'])
+            data = {
+                'mensaje': request.data['mensaje'],
+                'imagen': imag
+            }
+            serializer = H_imagenSerializer(data=data)
+        else:
+            serializer = H_imagenSerializer(data=request.data)
+        # serializer = H_imagenSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+# Crear contenido de video para homenaje
+class Hvideo_Set(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def post(self, request, format=None):
+        serializer = H_videoSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+# Obtener contenido de audio para homenaje
+class Haudio_Get(APIView):
+    def get(self, request, id, format=None):
+        Haudio_obj = H_audio.objects.filter(Q(id_homenaje=id))
+        serializer = H_audioSerializer(Haudio_obj, many=True)
+        return Response(serializer.data)
+
+#Borrado de homenaje AUDIO
+class HAudio_Delete(APIView):
+    def get_object(self, id):
+        try:
+            return H_audio.objects.get(id_audio=id)
+        except H_audio.DoesNotExist:
+            raise Http404
+    def delete(self, request, id_audio, format=None):
+        audioObj = self.get_object(id_audio)
+        seri = H_audioSerializer(audioObj)
+        path = seri['audio'].value[7:]
+        audioObj.delete()
+        default_storage.delete(path)
+        return Response(status=status.HTTP_200_OK)
+
+# Crear contenido de audio para homenaje
+class Haudio_Set(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def post(self, request, format=None):
+        serializer = H_audioSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+#Borrado de homenaje VIDEO
+class HVideo_Delete(APIView):
+    def get_object(self, id):
+        try:
+            return H_video.objects.get(id_video=id)
+        except H_video.DoesNotExist:
+            raise Http404
+    def delete(self, request, id_video, format=None):
+        videoObj = self.get_object(id_video)
+        seri = H_videoSerializer(videoObj)
+        path = seri['video'].value[7:]
+        videoObj.delete()
+        default_storage.delete(path)
+
+        return Response(status=status.HTTP_200_OK)
+
+# Actualizar contador de rosas
+class AmountPartialUpdateView(APIView):
+
+    def patch(self, request, pk, num_rosas):
+        model = get_object_or_404(Difunto, pk=pk)
+        data = {"num_rosas": model.num_rosas + int(num_rosas)}
+        serializer = DifuntoSerializer(model, data=data, partial=True)
+
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+# Obtener registro en hitorial de rosas
+class Historial_rosasGet(APIView):
+    def get(self, request, id, format=None):
+        historial_Obj = Historial_rosas.objects.filter(Q(id_difunto=id))
+        serializer = Log_RosasSerializer(historial_Obj, many=True)
+        return Response(serializer.data)
+
+# Guardar registro de rosa
+class Historial_rosasSet(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def post(self, request, format=None):
+        serializer = Historial_rosasSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+# actualizar imagen de perfil desde movil
 class ImageUserUpdate(APIView):
-    # permission_classes = (IsAuthenticated,)
     def get_object(self, id):
         try:
             return User.objects.get(id=id)
@@ -339,14 +569,33 @@ class ImageUserUpdate(APIView):
             ext = format.split('/')[-1]
             nameFile = UserProfileSerializer(usuarioObj)['username'].value + "-" + request.data['nombre_file']
             imag = ContentFile(base64.b64decode(imgstr), name=nameFile)
-            # del request.data['password']
+            request.data._mutable = True
+
             del request.data['img_base64']
             del request.data['nombre_file']
+            if 'delete_img' in request.data:
+                pathImgDel = request.data['delete_img']
+                path = pathImgDel[7:]
+                default_storage.delete(path)
+                del request.data['delete_img']
+
             request.data['image_perfil'] = imag
-            print(UserProfileSerializer(usuarioObj))
+            request.data._mutable = False
             serializer = UserProfileSerializer(usuarioObj, data = request.data)
             if serializer.is_valid():
                 serializer.save()
                 return Response(serializer.data, status=status.HTTP_200_OK)
             return Response(serializer.errors,  status=status.HTTP_400_BAD_REQUEST)
 
+#obtener usuario por id
+class UsuarioGetById(APIView):
+    permission_classes = (IsAuthenticated,)
+    def get_object(self, id):
+        try:
+            return User.objects.get(id=id)
+        except User.DoesNotExist:
+            raise Http404
+    def get(self, request, id, format=None):
+        usuarioObj = self.get_object(id)
+        serializer = UserProfileSerializer(usuarioObj)
+        return Response(serializer.data)

@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import User, Empresa, Red_social, Camposanto, Punto_geolocalizacion, Sector, Tipo_sepultura, Responsable_difunto, Difunto, Permiso, User_permisos, Homenaje
+from .models import User, Empresa, Red_social, Camposanto, Punto_geolocalizacion, Sector, Tipo_sepultura, Responsable_difunto, Difunto, Permiso, User_permisos, Homenajes, H_mensaje, H_imagen, H_video, H_audio, Historial_rosas
 from django.conf import settings
 from django.core.mail import send_mail
 
@@ -49,6 +49,19 @@ class DifuntoSerializer(serializers.ModelSerializer):
         model = Difunto
         fields = '__all__'
 
+
+class PermisoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Permiso
+        fields = '__all__'
+
+class User_permisosSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User_permisos
+        fields = '__all__'
+
+#PENDIENTE DE AGREGAR A PYTHON ANYWHERE
+
 class UserProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
@@ -66,9 +79,10 @@ class UserProfileSerializer(serializers.ModelSerializer):
             'direccion',
             'id_camposanto',
             'staff',
-            'tipo_usuario'
+            'tipo_usuario',
+            'is_active',
         )
-        # extra_kwargs = {'password': {'write_only': True }}
+        #extra_kwargs = {'password': {'write_only': True}}
 
     def create(self, validated_data):
         print('imagen' in validated_data)
@@ -76,10 +90,10 @@ class UserProfileSerializer(serializers.ModelSerializer):
         user = User(**validated_data)
         user.username = validated_data.get('username')
         user.set_password(password)
-        # validar = user.save()
-        # if(validar == None):
-        #     camposanto = self.obtener_camposanto(user)
-        #     self.send_email(user, camposanto)
+        validar = user.save()
+        if(validar == None):
+            camposanto = self.obtener_camposanto(user)
+            self.send_email(user, camposanto)
         return user
 
     def obtener_camposanto(self, usuario):
@@ -102,18 +116,52 @@ class UserProfileSerializer(serializers.ModelSerializer):
         email_from = settings.EMAIL_HOST_USER
         recipient_list = [usuario.email, ]
         send_mail(subject, message, email_from, recipient_list)
-
-class PermisoSerializer(serializers.ModelSerializer):
+        
+class H_mensajeSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Permiso
+        model = H_mensaje
         fields = '__all__'
 
-class User_permisosSerializer(serializers.ModelSerializer):
+class H_imagenSerializer(serializers.ModelSerializer):
     class Meta:
-        model = User_permisos
+        model = H_imagen
+        fields = '__all__'
+
+class H_videoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = H_video
+        fields = '__all__'
+
+class H_audioSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = H_audio
         fields = '__all__'
 
 class HomenajeSerializer(serializers.ModelSerializer):
+    id_usuario = UserProfileSerializer()
+    id_difunto = DifuntoSerializer(required=False)
+    id_textcontent = H_mensajeSerializer(required=False)
+    id_imagecontent = H_imagenSerializer(required=False)
+    id_videocontent = H_videoSerializer(required=False)
+    id_audiocontent = H_audioSerializer(required=False)
+
     class Meta:
-        model = Homenaje
+        model = Homenajes
         fields = '__all__'
+
+class HomenajeSimpleSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Homenajes
+        fields = '__all__'
+
+class Historial_rosasSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Historial_rosas
+        fields = '__all__'
+
+class Log_RosasSerializer(serializers.ModelSerializer):
+    id_usuario = UserProfileSerializer()
+    class Meta:
+        model = Historial_rosas
+        fields = '__all__'
+
