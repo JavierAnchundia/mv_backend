@@ -607,7 +607,7 @@ class UsuarioGetById(APIView):
         return Response(serializer.data)
 
 # Para recuperar la contraseña 10/11/2020
-class EnviarCorreoContraseña(APIView):
+class EnviarCorreoContrasena(APIView):
     def get(self, request, email, id_camp, format=None):
         usuariosObj = User.objects.filter(Q(id_camposanto=id_camp) & Q(email=email))
         if(usuariosObj.exists()):
@@ -634,6 +634,7 @@ class ActualizarContrasena(APIView):
         token = request.data['token']
         token_generator = PasswordResetTokenGenerator()
         is_valid_token = token_generator.check_token(usuarioObj, token)
+        print(is_valid_token)
         if(is_valid_token):
             if 'password' in request.data:
                 usuarioObj.set_password(request.data['password'])
