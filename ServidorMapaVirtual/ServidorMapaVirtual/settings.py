@@ -12,7 +12,7 @@ https://docs.djangoproject.com/en/3.1/ref/settings/
 import os
 from pathlib import Path
 from datetime import timedelta
-
+# 10/11/2020
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -30,6 +30,9 @@ SECRET_KEY = 'dl_xihb33_il*jo!=b+ia2%+9&wtaxu(mz=x1%u9ar$sa@!w#g'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
+
+# para token de password 10/11/2020
+PASSWORD_RESET_TIMEOUT_DAYS = 1
 
 ALLOWED_HOSTS = []
 

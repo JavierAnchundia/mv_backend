@@ -14,9 +14,15 @@ from .servicioFacebook import Facebook
 from .get_jwt_user import Json_web_token
 import base64
 from django.core.files.base import ContentFile
+# agregar para enviar mensaje
+from django.conf import settings
+from django.core.mail import send_mail
 
 # prueba eliminar file
 from django.core.files.storage import default_storage
+
+# para token reset password
+from django.contrib.auth.tokens import PasswordResetTokenGenerator
 
 '''API Rest get unico, get list, post y put para Camposanto'''
 class CamposantoView(APIView):
@@ -599,3 +605,38 @@ class UsuarioGetById(APIView):
         usuarioObj = self.get_object(id)
         serializer = UserProfileSerializer(usuarioObj)
         return Response(serializer.data)
+
+# Para recuperar la contraseña 10/11/2020
+class EnviarCorreoContraseña(APIView):
+    def get(self, request, email, id_camp, format=None):
+        usuariosObj = User.objects.filter(Q(id_camposanto=id_camp) & Q(email=email))
+        if(usuariosObj.exists()):
+            token_generator = PasswordResetTokenGenerator()
+            token = token_generator.make_token(usuariosObj[0])
+            usuario = UserProfileSerializer(usuariosObj[0])
+            subject = '¡Recuperar Contraseña!'
+            message = 'Para cambiar su contraseña seguir el siguiente link: \n'+'http://127.0.0.1:8000/recuperar_password/_9d_us5r_=/' + str(usuario['id'].value)+"/"+ str(token) + "/"
+            email_from = settings.EMAIL_HOST_USER
+            recipient_list = [usuario['email'].value, ]
+            send_mail(subject, message, email_from, recipient_list)
+            return Response(data={'status': "success"}, status=status.HTTP_200_OK)
+        return Response(data={'status': "error"}, status=status.HTTP_400_BAD_REQUEST)
+
+# Para recuperar la contraseña 10/11/2020
+class ActualizarContrasena(APIView):
+    def get_object(self, id):
+        try:
+            return User.objects.get(id=id)
+        except User.DoesNotExist:
+            raise Http404
+    def put(self, request, id, format=None):
+        usuarioObj = self.get_object(id)
+        token = request.data['token']
+        token_generator = PasswordResetTokenGenerator()
+        is_valid_token = token_generator.check_token(usuarioObj, token)
+        if(is_valid_token):
+            if 'password' in request.data:
+                usuarioObj.set_password(request.data['password'])
+                usuarioObj.save()
+                return Response(data={'status': "success"}, status=status.HTTP_200_OK)
+        return Response(data={'status': "error"}, status=status.HTTP_400_BAD_REQUEST)

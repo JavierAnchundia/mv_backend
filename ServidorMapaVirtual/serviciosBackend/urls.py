@@ -46,7 +46,10 @@ urlpatterns = [
     path('hvideo_del/<str:id_video>/', views.HVideo_Delete.as_view()),
     path('permiso/<str:pk>/', views.Permiso_Info.as_view()),
 
-
+    # actualizar contasena del usuario  10/11/2020
+    path('actualizar_contrasena/<str:id>/', views.ActualizarContrasena.as_view()),
+    # api utilizada para escribir el correo en la aplicacion en web final o movil  10/11/2020
+    path('enviar_email_password/<str:email>/<str:id_camp>/', views.EnviarCorreoContraseña.as_view()),
 
     # actualizar imagen movil
     path('update_image_profile/<str:id>/', views.ImageUserUpdate.as_view()),
