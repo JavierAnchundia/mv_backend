@@ -149,7 +149,6 @@
                 if((contrasena == repeatContrasena) && (contrasena.length >= 6 && contrasena.length <=20) && (repeatContrasena.length >= 6 && repeatContrasena.length <=20)){
                     let url = window.location.href;
                     let arregloUrl = url.split("/");
-                    console.log(arregloUrl);
                     let id_user = arregloUrl[5];
                     let token = arregloUrl[6];
                     let datos = {

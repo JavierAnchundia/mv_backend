@@ -24,6 +24,8 @@ from django.core.files.storage import default_storage
 # para token reset password
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 
+from .sendEmail import enviarEmailToUserContrasena
+
 '''API Rest get unico, get list, post y put para Camposanto'''
 class CamposantoView(APIView):
     permission_classes = (IsAuthenticated,)
@@ -611,16 +613,33 @@ class EnviarCorreoContrasena(APIView):
     def get(self, request, email, id_camp, format=None):
         usuariosObj = User.objects.filter(Q(id_camposanto=id_camp) & Q(email=email))
         if(usuariosObj.exists()):
-            token_generator = PasswordResetTokenGenerator()
-            token = token_generator.make_token(usuariosObj[0])
-            usuario = UserProfileSerializer(usuariosObj[0])
-            subject = '¡Recuperar Contraseña!'
-            message = 'Para cambiar su contraseña seguir el siguiente link: \n'+ config_backend.get('url_change_password') + str(usuario['id'].value)+"/"+ str(token) + "/"
-            email_from = settings.EMAIL_HOST_USER
-            recipient_list = [usuario['email'].value, ]
-            send_mail(subject, message, email_from, recipient_list)
-            return Response(data={'status': "success"}, status=status.HTTP_200_OK)
-        return Response(data={'status': "error"}, status=status.HTTP_400_BAD_REQUEST)
+            retorno = enviarEmailToUserContrasena(usuariosObj[0])
+            if retorno == 1:
+                return Response(data={'status': "success"}, status=status.HTTP_200_OK)
+            else:
+                return Response(
+                    data={'status': "SMTPException", "message": "No se ha podido enviar el mensaje"},
+                    status=status.HTTP_400_BAD_REQUEST)
+        return Response(data={'status': "error"}, status=status.HTTP_404_NOT_FOUND)
+
+# Enviar correo para usuarios admin
+class EnviarCorreoContrasenaAdmin(APIView):
+    def get_object(self, username):
+        try:
+            return User.objects.get(username=username)
+        except User.DoesNotExist:
+            raise Http404
+    def get(self, request, username, format=None):
+        usuarioObj = self.get_object(username)
+        if usuarioObj:
+            retorno = enviarEmailToUserContrasena(usuarioObj)
+            if retorno == 1 :
+                return Response(data={'status': "success"}, status=status.HTTP_200_OK)
+            else:
+                return Response(
+                    data={'status': "SMTPException", "message": "No se ha podido enviar el mensaje"},
+                    status=status.HTTP_400_BAD_REQUEST)
+        return Response(data={'status': "error"}, status=status.HTTP_404_NOT_FOUND)
 
 # Para recuperar la contraseña 10/11/2020
 class ActualizarContrasena(APIView):
@@ -634,7 +653,6 @@ class ActualizarContrasena(APIView):
         token = request.data['token']
         token_generator = PasswordResetTokenGenerator()
         is_valid_token = token_generator.check_token(usuarioObj, token)
-        print(is_valid_token)
         if(is_valid_token):
             if 'password' in request.data:
                 usuarioObj.set_password(request.data['password'])

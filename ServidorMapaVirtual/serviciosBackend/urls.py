@@ -50,6 +50,8 @@ urlpatterns = [
     path('actualizar_contrasena/<str:id>/', views.ActualizarContrasena.as_view()),
     # api utilizada para escribir el correo en la aplicacion en web final o movil  10/11/2020
     path('enviar_email_password/<str:email>/<str:id_camp>/', views.EnviarCorreoContrasena.as_view()),
+    # api utilizada para escribir el correo en la aplicacion en admin
+    path('enviar_email_password_admin/<str:username>/', views.EnviarCorreoContrasenaAdmin.as_view()),
 
     # actualizar imagen movil
     path('update_image_profile/<str:id>/', views.ImageUserUpdate.as_view()),

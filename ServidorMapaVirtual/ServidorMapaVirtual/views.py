@@ -6,5 +6,12 @@ from .config import config_backend
 def RecuperarContrasena(request, id_user, token):
     url_backend = config_backend.get('url_backend_image')
     namePage = config_backend.get('name_page')
-    return render(request, 'recuperarContrasena.html', {"user": id_user, "token": token, "url_backend": url_backend,  "namePage": namePage})
+    actualizar_contrasena = config_backend.get('actualizar_contrasena')
+    return render(request, 'recuperarContrasena.html', {
+        "user": id_user,
+        "token": token,
+        "url_backend": url_backend,
+        "namePage": namePage,
+        "actualizar_contrasena": actualizar_contrasena
+    })
 
