@@ -632,13 +632,20 @@ class EnviarCorreoContrasenaAdmin(APIView):
     def get(self, request, username, format=None):
         usuarioObj = self.get_object(username)
         if usuarioObj:
-            retorno = enviarEmailToUserContrasena(usuarioObj)
-            if retorno == 1 :
-                return Response(data={'status': "success"}, status=status.HTTP_200_OK)
+            serializerUser = UserProfileSerializer(usuarioObj)
+            tipo_user = serializerUser['tipo_usuario'].value
+            if(tipo_user == "ha" or tipo_user == "ad" or tipo_user == "su"):
+                retorno = enviarEmailToUserContrasena(usuarioObj)
+                if retorno == 1 :
+                    return Response(data={'status': "success"}, status=status.HTTP_200_OK)
+                else:
+                    return Response(
+                        data={'status': "SMTPException", "message": "No se ha podido enviar el mensaje"},
+                        status=status.HTTP_400_BAD_REQUEST)
             else:
                 return Response(
-                    data={'status': "SMTPException", "message": "No se ha podido enviar el mensaje"},
-                    status=status.HTTP_400_BAD_REQUEST)
+                    data={'status': "Not Found", "message": "Tipo de usuario no válido"},
+                    status=status.HTTP_404_NOT_FOUND)
         return Response(data={'status': "error"}, status=status.HTTP_404_NOT_FOUND)
 
 # Para recuperar la contraseña 10/11/2020
