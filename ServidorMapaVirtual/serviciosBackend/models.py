@@ -202,3 +202,8 @@ class Historial_rosas(models.Model):
     id_difunto = models.ForeignKey(Difunto, on_delete=models.CASCADE)
     fecha_publicacion = models.DateField()
 
+class TokenDevice(models.Model):
+    id_token_device = models.AutoField(primary_key = True, unique = True)
+    token_device = models.CharField(max_length=1500)
+    plataform = models.CharField(max_length=25, default=None, null=True, blank=True)
+    id_user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)

@@ -55,9 +55,9 @@ CORS_ORIGIN_WHITELIST = [
   'http://localhost:4200',
   'http://localhost:8000',
   'http://localhost:8100',
-    'http://192.168.0.112:8100',
+    'http://192.168.0.107:8100',
 ]
-ALLOWED_HOSTS = ['192.168.0.112', 'localhost', '127.0.0.1']
+ALLOWED_HOSTS = ['192.168.0.107', 'localhost', '127.0.0.1']
 CORS_ALLOW_METHODS = [
     'DELETE',
     'GET',

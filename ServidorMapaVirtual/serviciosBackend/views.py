@@ -8,8 +8,8 @@ from rest_framework.permissions import (AllowAny, IsAuthenticated)
 from .permissions import IsLoggedInUserOrAdmin, IsAdminUser
 from django.shortcuts import get_object_or_404
 from rest_framework.renderers import (HTMLFormRenderer, JSONRenderer,BrowsableAPIRenderer,)
-from .models import User, Empresa, Red_social, Camposanto, Punto_geolocalizacion, Sector, Tipo_sepultura, Responsable_difunto, Difunto, Permiso, User_permisos, Homenajes, H_mensaje, H_imagen, H_video, H_audio, Historial_rosas
-from .serializers import UserProfileSerializer, EmpresaSerializer, Red_socialSerializer, CamposantoSerializer, Punto_geoSerializer, SectorSerializer, Tipo_sepulturaSerializer, Responsable_difuntoSerializer, DifuntoSerializer, PermisoSerializer, User_permisosSerializer, HomenajeSerializer, H_mensajeSerializer, H_imagenSerializer, H_videoSerializer, H_audioSerializer,HomenajeSimpleSerializer, Historial_rosasSerializer,Log_RosasSerializer
+from .models import User, Empresa, Red_social, Camposanto, Punto_geolocalizacion, Sector, Tipo_sepultura, Responsable_difunto, Difunto, Permiso, User_permisos, Homenajes, H_mensaje, H_imagen, H_video, H_audio, Historial_rosas, TokenDevice
+from .serializers import UserProfileSerializer, EmpresaSerializer, Red_socialSerializer, CamposantoSerializer, Punto_geoSerializer, SectorSerializer, Tipo_sepulturaSerializer, Responsable_difuntoSerializer, DifuntoSerializer, PermisoSerializer, User_permisosSerializer, HomenajeSerializer, H_mensajeSerializer, H_imagenSerializer, H_videoSerializer, H_audioSerializer,HomenajeSimpleSerializer, Historial_rosasSerializer,Log_RosasSerializer, Token_DeviceSerializer
 from .servicioFacebook import Facebook
 from .get_jwt_user import Json_web_token
 import base64
@@ -666,3 +666,11 @@ class ActualizarContrasena(APIView):
                 usuarioObj.save()
                 return Response(data={'status': "success"}, status=status.HTTP_200_OK)
         return Response(data={'status': "error"}, status=status.HTTP_400_BAD_REQUEST)
+
+class TokenDeviceApi(APIView):
+    def post(self, request, format=None):
+        serializer = Token_DeviceSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

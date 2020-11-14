@@ -60,6 +60,8 @@ urlpatterns = [
     #get user by id
     path('get_user_by_id/<str:id>/', views.UsuarioGetById.as_view()),
 
+    #Post para token device
+    path('post_token_device/', views.TokenDeviceApi.as_view()),
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)
