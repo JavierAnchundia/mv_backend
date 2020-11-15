@@ -8,8 +8,10 @@ from rest_framework.permissions import (AllowAny, IsAuthenticated)
 from .permissions import IsLoggedInUserOrAdmin, IsAdminUser
 from django.shortcuts import get_object_or_404
 from rest_framework.renderers import (HTMLFormRenderer, JSONRenderer,BrowsableAPIRenderer,)
-from .models import User, Empresa, Red_social, Camposanto, Punto_geolocalizacion, Sector, Tipo_sepultura, Responsable_difunto, Difunto, Permiso, User_permisos, Homenajes, H_mensaje, H_imagen, H_video, H_audio, Historial_rosas, TokenDevice
-from .serializers import UserProfileSerializer, EmpresaSerializer, Red_socialSerializer, CamposantoSerializer, Punto_geoSerializer, SectorSerializer, Tipo_sepulturaSerializer, Responsable_difuntoSerializer, DifuntoSerializer, PermisoSerializer, User_permisosSerializer, HomenajeSerializer, H_mensajeSerializer, H_imagenSerializer, H_videoSerializer, H_audioSerializer,HomenajeSimpleSerializer, Historial_rosasSerializer,Log_RosasSerializer, Token_DeviceSerializer
+from .models import User, Empresa, Red_social, Camposanto, Punto_geolocalizacion, Sector, Tipo_sepultura, \
+    Responsable_difunto, Difunto, Permiso, User_permisos, Homenajes, H_mensaje, H_imagen, H_video, H_audio, \
+    Historial_rosas, TokenDevice, Favoritos
+from .serializers import UserProfileSerializer, EmpresaSerializer, Red_socialSerializer, CamposantoSerializer, Punto_geoSerializer, SectorSerializer, Tipo_sepulturaSerializer, Responsable_difuntoSerializer, DifuntoSerializer, PermisoSerializer, User_permisosSerializer, HomenajeSerializer, H_mensajeSerializer, H_imagenSerializer, H_videoSerializer, H_audioSerializer,HomenajeSimpleSerializer, Historial_rosasSerializer,Log_RosasSerializer, Token_DeviceSerializer, FavoritosSerializer, FavoritosFullSerializer
 from .servicioFacebook import Facebook
 from .get_jwt_user import Json_web_token
 import base64
@@ -674,3 +676,37 @@ class TokenDeviceApi(APIView):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class FavoritosSet(APIView):
+    permission_classes =  (IsAuthenticated,)
+
+    def post(self, request, format=None):
+        serializer = FavoritosSerializer(data = request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class Favoritos_Get(APIView):
+    permission_classes =  (IsAuthenticated,)
+
+    def get(self, request, id, format=None):
+        user_favoritosObj = Favoritos.objects.filter(Q(id_usuario=id))
+        serializer = FavoritosFullSerializer(user_favoritosObj, many=True)
+        return Response(serializer.data)
+
+class Favoritos_List(APIView):
+    permission_classes =  (IsAuthenticated,)
+
+    def get(self, request, id, format=None):
+        user_favoritosObj = Favoritos.objects.filter(Q(id_usuario=id))
+        serializer = FavoritosSerializer(user_favoritosObj, many=True)
+        return Response(serializer.data)
+
+class FavoritosDelete(APIView):
+    permission_classes =  (IsAuthenticated,)
+
+    def delete(self, request, id_usuario, id_difunto, format=None):
+        favoritoObj = Favoritos.objects.filter(Q(id_usuario=id_usuario) & (Q(id_difunto=id_difunto)))
+        favoritoObj.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)

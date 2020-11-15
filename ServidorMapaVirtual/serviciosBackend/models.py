@@ -207,3 +207,10 @@ class TokenDevice(models.Model):
     token_device = models.CharField(max_length=1500)
     plataform = models.CharField(max_length=25, default=None, null=True, blank=True)
     id_user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
+
+#CAMBIOS POR ANADIR A PA PARA LA PARTE DE FAVORITOS
+class Favoritos(models.Model):
+    id_favorito = models.AutoField(primary_key = True, unique = True)
+    estado = models.BooleanField(default=False)
+    id_usuario = models.ForeignKey(User, on_delete=models.CASCADE)
+    id_difunto = models.ForeignKey(Difunto, on_delete=models.CASCADE)

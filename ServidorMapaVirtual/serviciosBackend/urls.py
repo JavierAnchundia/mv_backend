@@ -62,6 +62,12 @@ urlpatterns = [
 
     #Post para token device
     path('post_token_device/', views.TokenDeviceApi.as_view()),
+
+    #Favoritos por agregar a PA
+    path('favoritos/', views.FavoritosSet.as_view()),
+    path('favoritos/<str:id>/', views.Favoritos_Get.as_view()),
+    path('favoritos_list/<str:id>/', views.Favoritos_List.as_view()),
+    path('favoritos_del/<str:id_usuario>/<str:id_difunto>/', views.FavoritosDelete.as_view()),
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)

@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import User, Empresa, Red_social, Camposanto, Punto_geolocalizacion, Sector, Tipo_sepultura, Responsable_difunto, Difunto, Permiso, User_permisos, Homenajes, H_mensaje, H_imagen, H_video, H_audio, Historial_rosas, TokenDevice
+from .models import User, Empresa, Red_social, Camposanto, Punto_geolocalizacion, Sector, Tipo_sepultura, Responsable_difunto, Difunto, Permiso, User_permisos, Homenajes, H_mensaje, H_imagen, H_video, H_audio, Historial_rosas, TokenDevice, Favoritos
 from django.conf import settings
 from django.core.mail import send_mail
 
@@ -168,4 +168,18 @@ class Log_RosasSerializer(serializers.ModelSerializer):
 class Token_DeviceSerializer(serializers.ModelSerializer):
     class Meta:
         model = TokenDevice
+        fields = '__all__'
+
+#CAMBIOS POR ANADIR A PA PARA LA PARTE DE FAVORITOS
+
+class FavoritosSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Favoritos
+        fields = '__all__'
+
+class FavoritosFullSerializer(serializers.ModelSerializer):
+    id_difunto = DifuntoSerializer(required=False)
+
+    class Meta:
+        model = Favoritos
         fields = '__all__'
