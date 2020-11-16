@@ -122,8 +122,9 @@ class User(AbstractBaseUser):
     email = models.EmailField(_('email address'), max_length=200, default=None, null=True, blank=True)
     # se debe cambiar que el username es requerido
     username = models.CharField(max_length=50, unique=True, default=None, null=True, blank=True)
-    password = models.CharField(max_length=100)
+    password = models.CharField(max_length=100, default=None, null=True, blank=True)
     telefono = models.CharField(max_length=10, default=None, null=True, blank=True)
+    image_perfil = models.ImageField(upload_to='perfil', max_length=500, default=None, null=True, blank=True)
     is_facebook = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
     genero = models.CharField(max_length=15, default=None, null=True, blank=True)
@@ -158,8 +159,6 @@ class User_permisos(models.Model):
     id_user_permiso = models.AutoField(primary_key=True, unique=True)
     id_user = models.ForeignKey(User, on_delete=models.CASCADE)
     id_permiso = models.ForeignKey(Permiso, on_delete=models.CASCADE)
-
-#PENDIENTE DE AGREGAR A PYTHON ANYWHERE
 
 
 class H_mensaje(models.Model):
@@ -203,3 +202,15 @@ class Historial_rosas(models.Model):
     id_difunto = models.ForeignKey(Difunto, on_delete=models.CASCADE)
     fecha_publicacion = models.DateField()
 
+class TokenDevice(models.Model):
+    id_token_device = models.AutoField(primary_key = True, unique = True)
+    token_device = models.CharField(max_length=1500)
+    plataform = models.CharField(max_length=25, default=None, null=True, blank=True)
+    id_user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
+
+#CAMBIOS POR ANADIR A PA PARA LA PARTE DE FAVORITOS
+class Favoritos(models.Model):
+    id_favorito = models.AutoField(primary_key = True, unique = True)
+    estado = models.BooleanField(default=False)
+    id_usuario = models.ForeignKey(User, on_delete=models.CASCADE)
+    id_difunto = models.ForeignKey(Difunto, on_delete=models.CASCADE)

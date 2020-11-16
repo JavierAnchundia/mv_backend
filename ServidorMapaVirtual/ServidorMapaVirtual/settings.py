@@ -12,11 +12,16 @@ https://docs.djangoproject.com/en/3.1/ref/settings/
 import os
 from pathlib import Path
 from datetime import timedelta
+# 10/11/2020
+from dotenv import load_dotenv
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 # BASE_DIR = Path(__file__).resolve(strict=True).parent.parent
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+from django.conf.global_settings import DATA_UPLOAD_MAX_MEMORY_SIZE
 
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+DATA_UPLOAD_MAX_MEMORY_SIZE = 10485760
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/
 
@@ -25,6 +30,9 @@ SECRET_KEY = 'dl_xihb33_il*jo!=b+ia2%+9&wtaxu(mz=x1%u9ar$sa@!w#g'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
+
+# para token de password 10/11/2020
+PASSWORD_RESET_TIMEOUT_DAYS = 1
 
 ALLOWED_HOSTS = []
 
@@ -47,9 +55,9 @@ CORS_ORIGIN_WHITELIST = [
   'http://localhost:4200',
   'http://localhost:8000',
   'http://localhost:8100',
-    'http://192.168.0.112:8100'
+  'http://192.168.0.8:8100',
 ]
-ALLOWED_HOSTS = ['192.168.0.112', 'localhost', '127.0.0.1']
+ALLOWED_HOSTS = ['192.168.0.8', 'localhost', '127.0.0.1']
 CORS_ALLOW_METHODS = [
     'DELETE',
     'GET',
@@ -71,6 +79,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'corsheaders',
     'serviciosBackend',
+    'django_crontab'
     # 'oauth2_provider',
     # 'social_django',
     # 'rest_framework_social_oauth2',
@@ -118,7 +127,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'MapaVirtual',
         'USER': 'root',
-        'PASSWORD' : 'Lamoriel17',
+        'PASSWORD' : '',
         'HOST': 'localhost',
         'PORT': '3306',
     }
@@ -208,7 +217,7 @@ AUTHENTICATION_BACKENDS = (
 
 #configuraciones por default para el token
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=180),
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=1),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
     'ROTATE_REFRESH_TOKENS': False,
     'BLACKLIST_AFTER_ROTATION': True,
@@ -240,5 +249,15 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'mapa.virtual.bryan@gmail.com'
-EMAIL_HOST_PASSWORD = 'mronvjpzbtgwckwe'
+EMAIL_HOST_USER = os.getenv("EMAIL")
+EMAIL_HOST_PASSWORD = os.getenv("PASSWORDEMAIL")
+
+#CRON JOBS ADD TO DJANGO
+CRONTAB_COMMAND_SUFFIX = '2>&1'
+
+CRONJOBS = [
+    ('0 11 * * *', 'serviciosBackend.cron.notificacion_cumpleanos', '>> cron_job.log'),
+    ('0 11 * * *', 'serviciosBackend.cron.aniversario_defuncion', '>> cron_job.log'),
+
+
+]

@@ -5,8 +5,6 @@ from rest_framework.routers import DefaultRouter
 from serviciosBackend import views
 
 urlpatterns = [
-    path('get_token_facebook/', views.Create_User_Facebook.as_view()),
-
     path('camposantos/', views.CamposantoView.as_view()),
     path('camposanto/<str:pk>/', views.CamposantoViewSet.as_view()),
     path('red_social_post/', views.Red_socialPost.as_view()),
@@ -31,7 +29,6 @@ urlpatterns = [
     path('listar_permisos_general/', views. PermisoView.as_view()),
     path('mis_user_permisos/<str:id>/', views.User_PermisosGet.as_view()),
     path('user_permisos_post/', views.User_PermisosPost.as_view()),
-    #AGREGAR A PA
     path('homenajes/<str:id>/', views.Homenaje_Get.as_view()),
     path('homenajes_post/', views.Homenaje_Set.as_view()),
     path('hmensaje/<str:id>/', views.Htexto_Get.as_view()),
@@ -43,8 +40,34 @@ urlpatterns = [
     path('difunto/update-partial/<str:pk>/<str:num_rosas>/',views.AmountPartialUpdateView.as_view()),
     path('historial_rosas/<str:id>/', views.Historial_rosasGet.as_view()),
     path('historial_rosas_post/', views.Historial_rosasSet.as_view()),
+    path('hmensaje_del/<str:id_mensaje>/', views.HTexto_Delete.as_view()),
+    path('himagen_del/<str:id_imagen>/', views.HImagen_Delete.as_view()),
+    path('haudio_del/<str:id_audio>/', views.HAudio_Delete.as_view()),
+    path('hvideo_del/<str:id_video>/', views.HVideo_Delete.as_view()),
     path('permiso/<str:pk>/', views.Permiso_Info.as_view()),
 
+    # actualizar contasena del usuario  10/11/2020
+    path('actualizar_contrasena/<str:id>/', views.ActualizarContrasena.as_view()),
+    # api utilizada para escribir el correo en la aplicacion en web final o movil  10/11/2020
+    path('enviar_email_password/<str:email>/<str:id_camp>/', views.EnviarCorreoContrasena.as_view()),
+    # api utilizada para escribir el correo en la aplicacion en admin
+    path('enviar_email_password_admin/<str:username>/', views.EnviarCorreoContrasenaAdmin.as_view()),
+
+    # actualizar imagen movil
+    path('update_image_profile/<str:id>/', views.ImageUserUpdate.as_view()),
+    # obtener el token para usuario de facebook
+    path('get_token_facebook/', views.Create_User_Facebook.as_view()),
+    #get user by id
+    path('get_user_by_id/<str:id>/', views.UsuarioGetById.as_view()),
+
+    #Post para token device
+    path('post_token_device/', views.TokenDeviceApi.as_view()),
+
+    #Favoritos por agregar a PA
+    path('favoritos/', views.FavoritosSet.as_view()),
+    path('favoritos/<str:id>/', views.Favoritos_Get.as_view()),
+    path('favoritos_list/<str:id>/', views.Favoritos_List.as_view()),
+    path('favoritos_del/<str:id_usuario>/<str:id_difunto>/', views.FavoritosDelete.as_view()),
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)

@@ -33,3 +33,9 @@ Se realiza con el siguiente comando
 ```bash
 python manage.py createsuperuser
 ```
+
+# Correr django con la ip del equipo
+Se realiza con el siguiente comando
+```bash
+python manage.py runserver ip:8100
+```
