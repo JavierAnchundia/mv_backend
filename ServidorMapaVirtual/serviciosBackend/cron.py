@@ -19,7 +19,7 @@ from serviciosBackend.serializers import FavoritosFullSerializer
 
 
 def enviarPush(reg_id,title,message, difunto):
-    push_service = FCMNotification(api_key="AAAA24gEGpE:APA91bGYzC5BiDTiCWM2diwEgoC_Rwt8iRXibonufzoNUbkHCzsuUcfH_6P3pjtv7CfQBveZWqJxWB4iIAOPXJulI6DiVFxk6vgVvex5Zdn3Du42i98h9ja49SsE-FDetubvLycsjynY")
+    push_service = FCMNotification(api_key=os.getenv("FCM_KEY"))
     data_message={
         "title": title,
         "message": message,
