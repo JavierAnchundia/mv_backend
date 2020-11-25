@@ -1,7 +1,6 @@
 #!/usr/bin/python3.8
 import sys, os, django
 BASE_DIR = os.path.dirname(sys.executable)
-print(BASE_DIR)
 sys.path.append("/home/carmsanc/MapaVirtual/BACKEND/ServidorMapaVirtual/")
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", 'ServidorMapaVirtual.settings')
 
@@ -13,11 +12,11 @@ import schedule
 import time
 from django.http import HttpResponse
 from pyfcm import FCMNotification
-
 from serviciosBackend.models import Favoritos, TokenDevice
 from serviciosBackend.serializers import FavoritosFullSerializer
+from dotenv import load_dotenv
 
-
+load_dotenv()
 def enviarPush(reg_id,title,message, difunto):
     push_service = FCMNotification(api_key=os.getenv("FCM_KEY"))
     data_message={

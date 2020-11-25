@@ -16,16 +16,12 @@ from .servicioFacebook import Facebook
 from .get_jwt_user import Json_web_token
 import base64
 from django.core.files.base import ContentFile
-# agregar para enviar mensaje
 from django.conf import settings
 from django.core.mail import send_mail
 from ServidorMapaVirtual.config import config_backend
-# prueba eliminar file
 from django.core.files.storage import default_storage
-
 # para token reset password
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
-
 from .sendEmail import enviarEmailToUserContrasena
 
 '''API Rest get unico, get list, post y put para Camposanto'''
@@ -197,15 +193,6 @@ class Responsable_difuntoViewSet(APIView):
             serializer.save()
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-'''API Rest post para Usuario'''
-# class Usuario_post(APIView):
-#     def post(self, request, format=None):
-#         serializer = UsuarioSerializer(data=request.data)
-#         if serializer.is_valid():
-#             serializer.save()
-#             return Response(serializer.data, status=status.HTTP_201_CREATED)
-#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 '''API Rest get list y get id para empresa'''
 class EmpresasView(APIView):
