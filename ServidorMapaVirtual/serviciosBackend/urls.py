@@ -60,8 +60,10 @@ urlpatterns = [
     #get user by id
     path('get_user_by_id/<str:id>/', views.UsuarioGetById.as_view()),
 
-    #Post para token device
-    path('post_token_device/', views.TokenDeviceApi.as_view()),
+    # Post para token device
+    path('post_token_device/', views.TokenDevicePost.as_view()),
+    # Get and put token device
+    path('api_token_device/<str:id>/', views.TokenDeviceGetPut.as_view()),
 
     #Favoritos por agregar a PA
     path('favoritos/', views.FavoritosSet.as_view()),

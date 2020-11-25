@@ -252,12 +252,3 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = os.getenv("EMAIL")
 EMAIL_HOST_PASSWORD = os.getenv("PASSWORDEMAIL")
 
-#CRON JOBS ADD TO DJANGO
-CRONTAB_COMMAND_SUFFIX = '2>&1'
-
-CRONJOBS = [
-    ('0 11 * * *', 'serviciosBackend.cron.notificacion_cumpleanos', '>> cron_job.log'),
-    ('0 11 * * *', 'serviciosBackend.cron.aniversario_defuncion', '>> cron_job.log'),
-
-
-]

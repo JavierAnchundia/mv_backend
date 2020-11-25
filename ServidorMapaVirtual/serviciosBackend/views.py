@@ -669,9 +669,33 @@ class ActualizarContrasena(APIView):
                 return Response(data={'status': "success"}, status=status.HTTP_200_OK)
         return Response(data={'status': "error"}, status=status.HTTP_400_BAD_REQUEST)
 
-class TokenDeviceApi(APIView):
+
+class TokenDevicePost(APIView):
     def post(self, request, format=None):
-        serializer = Token_DeviceSerializer(data=request.data)
+        tokenList = TokenDevice.objects.filter(Q(token_device=request.data['token_device']) & Q(plataform=request.data['plataform']))
+        if len(tokenList) >0:
+            serializer = Token_DeviceSerializer(tokenList[0])
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        else:
+            serializer = Token_DeviceSerializer(data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class TokenDeviceGetPut(APIView):
+    def get_object(self, id):
+        try:
+            return TokenDevice.objects.get(id_token_device=id)
+        except TokenDevice.DoesNotExist:
+            raise Http404
+    def get(self, request, id, format=None):
+        tokenDeviceObj = self.get_object(id)
+        serializer = Token_DeviceSerializer(tokenDeviceObj)
+        return Response(serializer.data)
+    def put(self, request, id, format=None):
+        tokenDeviceObj = self.get_object(id)
+        serializer = Token_DeviceSerializer(tokenDeviceObj, data =request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
