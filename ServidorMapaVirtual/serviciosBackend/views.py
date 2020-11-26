@@ -681,11 +681,20 @@ class TokenDeviceGetPut(APIView):
         serializer = Token_DeviceSerializer(tokenDeviceObj)
         return Response(serializer.data)
     def put(self, request, id, format=None):
-        tokenDeviceObj = self.get_object(id)
-        serializer = Token_DeviceSerializer(tokenDeviceObj, data =request.data)
+        #begin
+        listaTokensUser = TokenDevice.objects.filter(id_user=request.data['id_user'])
+        if(len(listaTokensUser) > 0):
+            serializer = Token_DeviceSerializer(listaTokensUser[0], data=request.data)
+            tokenDelete = TokenDevice.objects.filter(Q(token_device=request.data['token_device'])& Q(id_user=None))
+            if(len(tokenDelete) > 0):
+                tokenDelete[0].delete()
+        else:
+            tokenDeviceObj = self.get_object(id)
+            serializer = Token_DeviceSerializer(tokenDeviceObj, data=request.data)
+        #end
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class FavoritosSet(APIView):
