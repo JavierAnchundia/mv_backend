@@ -10,8 +10,8 @@ from django.shortcuts import get_object_or_404
 from rest_framework.renderers import (HTMLFormRenderer, JSONRenderer,BrowsableAPIRenderer,)
 from .models import User, Empresa, Red_social, Camposanto, Punto_geolocalizacion, Sector, Tipo_sepultura, \
     Responsable_difunto, Difunto, Permiso, User_permisos, Homenajes, H_mensaje, H_imagen, H_video, H_audio, \
-    Historial_rosas, TokenDevice, Favoritos
-from .serializers import UserProfileSerializer, EmpresaSerializer, Red_socialSerializer, CamposantoSerializer, Punto_geoSerializer, SectorSerializer, Tipo_sepulturaSerializer, Responsable_difuntoSerializer, DifuntoSerializer, PermisoSerializer, User_permisosSerializer, HomenajeSerializer, H_mensajeSerializer, H_imagenSerializer, H_videoSerializer, H_audioSerializer,HomenajeSimpleSerializer, Historial_rosasSerializer,Log_RosasSerializer, Token_DeviceSerializer, FavoritosSerializer, FavoritosFullSerializer
+    Historial_rosas, TokenDevice, Favoritos, Paquetes
+from .serializers import UserProfileSerializer, EmpresaSerializer, Red_socialSerializer, CamposantoSerializer, Punto_geoSerializer, SectorSerializer, Tipo_sepulturaSerializer, Responsable_difuntoSerializer, DifuntoSerializer, PermisoSerializer, User_permisosSerializer, HomenajeSerializer, H_mensajeSerializer, H_imagenSerializer, H_videoSerializer, H_audioSerializer,HomenajeSimpleSerializer, Historial_rosasSerializer,Log_RosasSerializer, Token_DeviceSerializer, FavoritosSerializer, FavoritosFullSerializer, PaquetesSerializer
 from .servicioFacebook import Facebook
 from .get_jwt_user import Json_web_token
 import base64
@@ -518,7 +518,6 @@ class HVideo_Delete(APIView):
         path = seri['video'].value[7:]
         videoObj.delete()
         default_storage.delete(path)
-
         return Response(status=status.HTTP_200_OK)
 
 # Actualizar contador de rosas
@@ -730,3 +729,46 @@ class FavoritosDelete(APIView):
         favoritoObj = Favoritos.objects.filter(Q(id_usuario=id_usuario) & (Q(id_difunto=id_difunto)))
         favoritoObj.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+# begin Paquetes
+class PaquetesPost(APIView):
+    # permission_classes = (IsAuthenticated,)
+    def post(self, request, format=None):
+        serializer = PaquetesSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class PaquetesList(APIView):
+    def get(self, request, id, format=None):
+        paquetesList = Paquetes.objects.filter(Q(id_camposanto=id))
+        serializer = PaquetesSerializer(paquetesList, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+class PaqueteUpdateDelete(APIView):
+    def get_object(self, id_paquete):
+        try:
+            return Paquetes.objects.get(id_paquete=id_paquete)
+        except Paquetes.DoesNotExist:
+            raise Http404
+    def put(self, request, id_paquete, format=None):
+        paquetObj = self.get_object(id_paquete)
+        if('imagen' in request.data):
+            seri = PaquetesSerializer(paquetObj)
+            path = seri['imagen'].value[7:]
+            default_storage.delete(path)
+        serializer = PaquetesSerializer(paquetObj, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    def delete(self, request, id_paquete, format=None):
+        paquetObj = self.get_object(id_paquete)
+        seri = PaquetesSerializer(paquetObj)
+        path = seri['imagen'].value[7:]
+        paquetObj.delete()
+        default_storage.delete(path)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+# end Paquetes

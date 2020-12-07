@@ -70,6 +70,11 @@ urlpatterns = [
     path('favoritos/<str:id>/', views.Favoritos_Get.as_view()),
     path('favoritos_list/<str:id>/', views.Favoritos_List.as_view()),
     path('favoritos_del/<str:id_usuario>/<str:id_difunto>/', views.FavoritosDelete.as_view()),
+
+    #Paquetes agregar a PA
+    path('paquete_add/', views.PaquetesPost.as_view()),
+    path('paquete_put_del/<str:id_paquete>/', views.PaqueteUpdateDelete.as_view()),
+    path('paquetes_list/<str:id>/', views.PaquetesList.as_view()),
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)

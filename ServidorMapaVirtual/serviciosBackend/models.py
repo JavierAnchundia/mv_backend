@@ -212,3 +212,12 @@ class Favoritos(models.Model):
     id_favorito = models.AutoField(primary_key = True, unique = True)
     id_usuario = models.ForeignKey(User, on_delete=models.CASCADE)
     id_difunto = models.ForeignKey(Difunto, on_delete=models.CASCADE)
+
+class Paquetes(models.Model):
+    id_paquete = models.AutoField(primary_key = True, unique = True)
+    nombre = models.CharField(max_length=70)
+    descripcion = models.CharField(max_length=500)
+    precio = models.FloatField()
+    imagen = models.ImageField(upload_to='paquetes', max_length=200, null=True, blank=True)
+    fecha_created = models.DateField()
+    id_camposanto = models.ForeignKey(Camposanto, on_delete=models.CASCADE)

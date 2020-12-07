@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import User, Empresa, Red_social, Camposanto, Punto_geolocalizacion, Sector, Tipo_sepultura, Responsable_difunto, Difunto, Permiso, User_permisos, Homenajes, H_mensaje, H_imagen, H_video, H_audio, Historial_rosas, TokenDevice, Favoritos
+from .models import User, Empresa, Red_social, Camposanto, Punto_geolocalizacion, Sector, Tipo_sepultura, Responsable_difunto, Difunto, Permiso, User_permisos, Homenajes, H_mensaje, H_imagen, H_video, H_audio, Historial_rosas, TokenDevice, Favoritos, Paquetes
 from django.conf import settings
 from django.core.mail import send_mail
 
@@ -179,7 +179,11 @@ class FavoritosSerializer(serializers.ModelSerializer):
 
 class FavoritosFullSerializer(serializers.ModelSerializer):
     id_difunto = DifuntoSerializer(required=False)
-
     class Meta:
         model = Favoritos
+        fields = '__all__'
+
+class PaquetesSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Paquetes
         fields = '__all__'
