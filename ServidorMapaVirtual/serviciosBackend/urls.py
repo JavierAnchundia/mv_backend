@@ -60,7 +60,7 @@ urlpatterns = [
     #get user by id
     path('get_user_by_id/<str:id>/', views.UsuarioGetById.as_view()),
 
-    #Post para token device
+    #Post para token devicex`
     path('post_token_device/', views.TokenDeviceApi.as_view()),
 
     #Favoritos por agregar a PA
@@ -68,6 +68,9 @@ urlpatterns = [
     path('favoritos/<str:id>/', views.Favoritos_Get.as_view()),
     path('favoritos_list/<str:id>/', views.Favoritos_List.as_view()),
     path('favoritos_del/<str:id_usuario>/<str:id_difunto>/', views.FavoritosDelete.as_view()),
+
+    path('info_permiso_user/<str:pk>/', views.Info_Permiso_User.as_view()),
+
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)

@@ -155,11 +155,17 @@ class Permiso(models.Model):
     nombre = models.CharField(unique=True, max_length=50)
     descripcion = models.CharField(max_length=150)
 
+    def __str__(self):
+        return self.nombre + str(self.id_permiso)
+
+
 class User_permisos(models.Model):
     id_user_permiso = models.AutoField(primary_key=True, unique=True)
     id_user = models.ForeignKey(User, on_delete=models.CASCADE)
     id_permiso = models.ForeignKey(Permiso, on_delete=models.CASCADE)
 
+    def __str__(self):
+        return str(self.id_permiso) + str(self.id_user)
 
 class H_mensaje(models.Model):
     id_mensaje = models.AutoField(primary_key = True, unique = True)

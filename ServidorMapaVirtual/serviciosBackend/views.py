@@ -11,7 +11,7 @@ from rest_framework.renderers import (HTMLFormRenderer, JSONRenderer,BrowsableAP
 from .models import User, Empresa, Red_social, Camposanto, Punto_geolocalizacion, Sector, Tipo_sepultura, \
     Responsable_difunto, Difunto, Permiso, User_permisos, Homenajes, H_mensaje, H_imagen, H_video, H_audio, \
     Historial_rosas, TokenDevice, Favoritos
-from .serializers import UserProfileSerializer, EmpresaSerializer, Red_socialSerializer, CamposantoSerializer, Punto_geoSerializer, SectorSerializer, Tipo_sepulturaSerializer, Responsable_difuntoSerializer, DifuntoSerializer, PermisoSerializer, User_permisosSerializer, HomenajeSerializer, H_mensajeSerializer, H_imagenSerializer, H_videoSerializer, H_audioSerializer,HomenajeSimpleSerializer, Historial_rosasSerializer,Log_RosasSerializer, Token_DeviceSerializer, FavoritosSerializer, FavoritosFullSerializer
+from .serializers import UserProfileSerializer, EmpresaSerializer, Red_socialSerializer, CamposantoSerializer, Punto_geoSerializer, SectorSerializer, Tipo_sepulturaSerializer, Responsable_difuntoSerializer, DifuntoSerializer, PermisoSerializer, User_permisosSerializer, Info_permisosSerializer, HomenajeSerializer, H_mensajeSerializer, H_imagenSerializer, H_videoSerializer, H_audioSerializer,HomenajeSimpleSerializer, Historial_rosasSerializer,Log_RosasSerializer, Token_DeviceSerializer, FavoritosSerializer, FavoritosFullSerializer
 from .servicioFacebook import Facebook
 from .get_jwt_user import Json_web_token
 import base64
@@ -316,6 +316,17 @@ class Permiso_Info(APIView):
     def get(self, request, pk):
         permisoObj = self.get_object(pk)
         serializer = PermisoSerializer(permisoObj)
+        return Response(serializer.data)
+class Info_Permiso_User(APIView):
+    def get_object(self,pk):
+        try:
+            return User_permisos.objects.filter(Q(id_user=pk))
+        except Permiso.DoesNotExist:
+            raise Http404
+
+    def get(self, request, pk):
+        permisoObj = self.get_object(pk)
+        serializer = Info_permisosSerializer(permisoObj, many=True)
         return Response(serializer.data)
 
 # Obtener permisos de un usuario o eliminar los permisos de un usuario

@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import User, Empresa, Red_social, Camposanto, Punto_geolocalizacion, Sector, Tipo_sepultura, Responsable_difunto, Difunto, Permiso, User_permisos, Homenajes, H_mensaje, H_imagen, H_video, H_audio, Historial_rosas, TokenDevice, Favoritos
+from .models import User, Empresa, Red_social, Camposanto, Punto_geolocalizacion, Sector, Tipo_sepultura, Responsable_difunto, Difunto, Permiso, User_permisos, Homenajes, H_mensaje, H_imagen, H_video, H_audio, User_permisos, Historial_rosas, TokenDevice, Favoritos
 from django.conf import settings
 from django.core.mail import send_mail
 
@@ -60,6 +60,12 @@ class User_permisosSerializer(serializers.ModelSerializer):
         model = User_permisos
         fields = '__all__'
 
+class Info_permisosSerializer(serializers.ModelSerializer):
+    permiso_name = serializers.CharField(source='id_permiso.nombre')
+
+    class Meta:
+        model = User_permisos
+        fields = ('id_user_permiso', 'id_user', 'id_permiso', 'permiso_name')
 #PENDIENTE DE AGREGAR A PYTHON ANYWHERE
 
 class UserProfileSerializer(serializers.ModelSerializer):
