@@ -12,7 +12,6 @@ https://docs.djangoproject.com/en/3.1/ref/settings/
 import os
 from pathlib import Path
 from datetime import timedelta
-# 10/11/2020
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -26,7 +25,7 @@ DATA_UPLOAD_MAX_MEMORY_SIZE = 10485760
 # See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'dl_xihb33_il*jo!=b+ia2%+9&wtaxu(mz=x1%u9ar$sa@!w#g'
+SECRET_KEY = os.getenv("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -79,10 +78,6 @@ INSTALLED_APPS = [
     'rest_framework',
     'corsheaders',
     'serviciosBackend',
-    'django_crontab'
-    # 'oauth2_provider',
-    # 'social_django',
-    # 'rest_framework_social_oauth2',
 ]
 
 MIDDLEWARE = [
@@ -109,8 +104,6 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-                # 'social_django.context_processors.backends',
-                # 'social_django.context_processors.login_redirect',
             ],
         },
     },
@@ -127,7 +120,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'MapaVirtual',
         'USER': 'root',
-        'PASSWORD' : '',
+        'PASSWORD' : 'toby',
         'HOST': 'localhost',
         'PORT': '3306',
     }
@@ -180,44 +173,22 @@ STATICFILES_DIRS = [
 MEDIA_ROOT = os.path.join(BASE_DIR, 'static/media')
 
 AUTH_USER_MODEL= 'serviciosBackend.User'
-# DRFSO2_PROPRIETARY_BACKEND_NAME = 'ServidorMapaVirtual'
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
-        # 'oauth2_provider.contrib.rest_framework.OAuth2Authentication',
-        # 'rest_framework_social_oauth2.authentication.SocialAuthentication',
     )
 }
 
 AUTHENTICATION_BACKENDS = (
-   # Facebook OAuth2
-   #  'social_core.backends.facebook.FacebookAppOAuth2',
-   #  'social_core.backends.facebook.FacebookOAuth2',
-
-    # django-rest-framework-social-oauth2
-    # 'rest_framework_social_oauth2.backends.DjangoOAuth2',
-
     # Django
     'django.contrib.auth.backends.ModelBackend',
 )
 
-# Facebook configuration
-# SOCIAL_AUTH_FACEBOOK_KEY = '921830748297038'
-# SOCIAL_AUTH_FACEBOOK_SECRET = 'fc9a9177662cd1eb9985d3aa6e856fe4'
-# SOCIAL_AUTH_FACEBOOK_KEY = '603186720557884'
-# SOCIAL_AUTH_FACEBOOK_SECRET = 'b4c4bd5fd8d9c832961466389749ac8e'
-
-# Define SOCIAL_AUTH_FACEBOOK_SCOPE to get extra permissions from Facebook.
-# Email is not sent by default, to get it, you must request the email permission.
-# SOCIAL_AUTH_FACEBOOK_SCOPE = ['email']
-# SOCIAL_AUTH_FACEBOOK_PROFILE_EXTRA_PARAMS = {
-#     'fields': 'id, name, email, first_name'
-# }
 
 #configuraciones por default para el token
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=1),
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=180),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
     'ROTATE_REFRESH_TOKENS': False,
     'BLACKLIST_AFTER_ROTATION': True,
@@ -252,12 +223,3 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = os.getenv("EMAIL")
 EMAIL_HOST_PASSWORD = os.getenv("PASSWORDEMAIL")
 
-#CRON JOBS ADD TO DJANGO
-CRONTAB_COMMAND_SUFFIX = '2>&1'
-
-CRONJOBS = [
-    ('0 11 * * *', 'serviciosBackend.cron.notificacion_cumpleanos', '>> cron_job.log'),
-    ('0 11 * * *', 'serviciosBackend.cron.aniversario_defuncion', '>> cron_job.log'),
-
-
-]

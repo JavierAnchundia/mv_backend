@@ -10,23 +10,20 @@ from django.shortcuts import get_object_or_404
 from rest_framework.renderers import (HTMLFormRenderer, JSONRenderer,BrowsableAPIRenderer,)
 from .models import User, Empresa, Red_social, Camposanto, Punto_geolocalizacion, Sector, Tipo_sepultura, \
     Responsable_difunto, Difunto, Permiso, User_permisos, Homenajes, H_mensaje, H_imagen, H_video, H_audio, \
-    Historial_rosas, TokenDevice, Favoritos
-from .serializers import UserProfileSerializer, EmpresaSerializer, Red_socialSerializer, CamposantoSerializer, Punto_geoSerializer, SectorSerializer, Tipo_sepulturaSerializer, Responsable_difuntoSerializer, DifuntoSerializer, PermisoSerializer, User_permisosSerializer, Info_permisosSerializer, HomenajeSerializer, H_mensajeSerializer, H_imagenSerializer, H_videoSerializer, H_audioSerializer,HomenajeSimpleSerializer, Historial_rosasSerializer,Log_RosasSerializer, Token_DeviceSerializer, FavoritosSerializer, FavoritosFullSerializer
+    Historial_rosas, TokenDevice, Favoritos, Paquetes
+from .serializers import UserProfileSerializer, EmpresaSerializer, Red_socialSerializer, CamposantoSerializer, Punto_geoSerializer, SectorSerializer, Tipo_sepulturaSerializer, Responsable_difuntoSerializer, DifuntoSerializer, PermisoSerializer, User_permisosSerializer, Info_permisosSerializer, HomenajeSerializer, H_mensajeSerializer, H_imagenSerializer, H_videoSerializer, H_audioSerializer,HomenajeSimpleSerializer, Historial_rosasSerializer,Log_RosasSerializer, Token_DeviceSerializer, FavoritosSerializer, FavoritosFullSerializer, PaquetesSerializer
 from .servicioFacebook import Facebook
 from .get_jwt_user import Json_web_token
 import base64
 from django.core.files.base import ContentFile
-# agregar para enviar mensaje
 from django.conf import settings
 from django.core.mail import send_mail
 from ServidorMapaVirtual.config import config_backend
-# prueba eliminar file
 from django.core.files.storage import default_storage
-
 # para token reset password
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
-
 from .sendEmail import enviarEmailToUserContrasena
+import datetime
 
 '''API Rest get unico, get list, post y put para Camposanto'''
 class CamposantoView(APIView):
@@ -165,10 +162,21 @@ class DifuntoListGet(APIView):
         return Response(serializer.data)
 
 class DifuntoListFilteredGet(APIView):
-    def get(self, request, id_camp, nombre, apellido, format=None):
-        difuntosObj = Difunto.objects.filter(Q(id_camposanto=id_camp) & (Q(nombre=nombre) | Q(apellido=apellido)))
+    def get(self, request, id_camp, nombre, apellido, desde, hasta, lapida, sector, sepultura, format=None):
+        difuntosObj = Difunto.objects.filter(id_camposanto=id_camp, nombre=nombre, apellido=apellido)
+        if ((desde != 'null') & (hasta != 'null')):
+            date_1 = datetime.datetime.strptime((hasta), "%Y-%m-%d")
+            end_date = date_1 + datetime.timedelta(days=1)
+            difuntosObj = difuntosObj.filter(fecha_difuncion__range=(desde, end_date))
+        if (lapida != 'null'):
+            difuntosObj = difuntosObj.filter(no_lapida=lapida)
+        if (sector != 'null'):
+            difuntosObj = difuntosObj.filter(id_sector=sector)
+        if (sepultura != 'null'):
+            difuntosObj = difuntosObj.filter(id_tip_sepultura=sepultura)
         serializer = DifuntoSerializer(difuntosObj, many=True)
         return Response(serializer.data)
+
 
 '''API Rest get unico, post para Responsable'''
 class Responsable_difuntoView(APIView):
@@ -197,15 +205,6 @@ class Responsable_difuntoViewSet(APIView):
             serializer.save()
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-'''API Rest post para Usuario'''
-# class Usuario_post(APIView):
-#     def post(self, request, format=None):
-#         serializer = UsuarioSerializer(data=request.data)
-#         if serializer.is_valid():
-#             serializer.save()
-#             return Response(serializer.data, status=status.HTTP_201_CREATED)
-#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 '''API Rest get list y get id para empresa'''
 class EmpresasView(APIView):
@@ -542,7 +541,6 @@ class HVideo_Delete(APIView):
         path = seri['video'].value[7:]
         videoObj.delete()
         default_storage.delete(path)
-
         return Response(status=status.HTTP_200_OK)
 
 # Actualizar contador de rosas
@@ -680,12 +678,45 @@ class ActualizarContrasena(APIView):
                 return Response(data={'status': "success"}, status=status.HTTP_200_OK)
         return Response(data={'status': "error"}, status=status.HTTP_400_BAD_REQUEST)
 
-class TokenDeviceApi(APIView):
+
+class TokenDevicePost(APIView):
     def post(self, request, format=None):
-        serializer = Token_DeviceSerializer(data=request.data)
+        tokenList = TokenDevice.objects.filter(Q(token_device=request.data['token_device']) & Q(plataform=request.data['plataform']))
+        if len(tokenList) >0:
+            serializer = Token_DeviceSerializer(tokenList[0])
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        else:
+            serializer = Token_DeviceSerializer(data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class TokenDeviceGetPut(APIView):
+    def get_object(self, id):
+        try:
+            return TokenDevice.objects.get(id_token_device=id)
+        except TokenDevice.DoesNotExist:
+            raise Http404
+    def get(self, request, id, format=None):
+        tokenDeviceObj = self.get_object(id)
+        serializer = Token_DeviceSerializer(tokenDeviceObj)
+        return Response(serializer.data)
+    def put(self, request, id, format=None):
+        #begin
+        listaTokensUser = TokenDevice.objects.filter(id_user=request.data['id_user'])
+        if(len(listaTokensUser) > 0):
+            serializer = Token_DeviceSerializer(listaTokensUser[0], data=request.data)
+            tokenDelete = TokenDevice.objects.filter(Q(token_device=request.data['token_device'])& Q(id_user=None))
+            if(len(tokenDelete) > 0):
+                tokenDelete[0].delete()
+        else:
+            tokenDeviceObj = self.get_object(id)
+            serializer = Token_DeviceSerializer(tokenDeviceObj, data=request.data)
+        #end
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class FavoritosSet(APIView):
@@ -721,3 +752,46 @@ class FavoritosDelete(APIView):
         favoritoObj = Favoritos.objects.filter(Q(id_usuario=id_usuario) & (Q(id_difunto=id_difunto)))
         favoritoObj.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+# begin Paquetes
+class PaquetesPost(APIView):
+    # permission_classes = (IsAuthenticated,)
+    def post(self, request, format=None):
+        serializer = PaquetesSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class PaquetesList(APIView):
+    def get(self, request, id, format=None):
+        paquetesList = Paquetes.objects.filter(Q(id_camposanto=id))
+        serializer = PaquetesSerializer(paquetesList, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+class PaqueteUpdateDelete(APIView):
+    def get_object(self, id_paquete):
+        try:
+            return Paquetes.objects.get(id_paquete=id_paquete)
+        except Paquetes.DoesNotExist:
+            raise Http404
+    def put(self, request, id_paquete, format=None):
+        paquetObj = self.get_object(id_paquete)
+        if('imagen' in request.data):
+            seri = PaquetesSerializer(paquetObj)
+            path = seri['imagen'].value[7:]
+            default_storage.delete(path)
+        serializer = PaquetesSerializer(paquetObj, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    def delete(self, request, id_paquete, format=None):
+        paquetObj = self.get_object(id_paquete)
+        seri = PaquetesSerializer(paquetObj)
+        path = seri['imagen'].value[7:]
+        paquetObj.delete()
+        default_storage.delete(path)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+# end Paquetes

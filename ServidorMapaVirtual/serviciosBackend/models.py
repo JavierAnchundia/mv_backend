@@ -193,7 +193,7 @@ class Homenajes(models.Model):
     id_homenaje = models.AutoField(primary_key = True, unique = True)
     id_usuario = models.ForeignKey(User,on_delete=models.CASCADE )
     id_difunto = models.ForeignKey(Difunto, on_delete= models.CASCADE)
-    fecha_publicacion = models.DateField()
+    fecha_publicacion = models.DateTimeField()
     estado = models.BooleanField(default=True)
     likes = models.IntegerField(default=0)
     id_textcontent = models.ForeignKey(H_mensaje, on_delete= models.CASCADE, blank=True, null=True)
@@ -206,7 +206,7 @@ class Historial_rosas(models.Model):
     rosa = models.BooleanField(default= True)
     id_usuario = models.ForeignKey(User, on_delete=models.CASCADE)
     id_difunto = models.ForeignKey(Difunto, on_delete=models.CASCADE)
-    fecha_publicacion = models.DateField()
+    fecha_publicacion = models.DateTimeField()
 
 class TokenDevice(models.Model):
     id_token_device = models.AutoField(primary_key = True, unique = True)
@@ -214,9 +214,16 @@ class TokenDevice(models.Model):
     plataform = models.CharField(max_length=25, default=None, null=True, blank=True)
     id_user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
 
-#CAMBIOS POR ANADIR A PA PARA LA PARTE DE FAVORITOS
 class Favoritos(models.Model):
     id_favorito = models.AutoField(primary_key = True, unique = True)
-    estado = models.BooleanField(default=False)
     id_usuario = models.ForeignKey(User, on_delete=models.CASCADE)
     id_difunto = models.ForeignKey(Difunto, on_delete=models.CASCADE)
+
+class Paquetes(models.Model):
+    id_paquete = models.AutoField(primary_key = True, unique = True)
+    nombre = models.CharField(max_length=70)
+    descripcion = models.CharField(max_length=500)
+    precio = models.FloatField()
+    imagen = models.ImageField(upload_to='paquetes', max_length=200, null=True, blank=True)
+    fecha_created = models.DateField()
+    id_camposanto = models.ForeignKey(Camposanto, on_delete=models.CASCADE)
