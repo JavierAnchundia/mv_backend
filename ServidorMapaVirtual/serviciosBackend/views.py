@@ -23,6 +23,7 @@ from django.core.files.storage import default_storage
 # para token reset password
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from .sendEmail import enviarEmailToUserContrasena
+import datetime
 
 '''API Rest get unico, get list, post y put para Camposanto'''
 class CamposantoView(APIView):
@@ -161,10 +162,21 @@ class DifuntoListGet(APIView):
         return Response(serializer.data)
 
 class DifuntoListFilteredGet(APIView):
-    def get(self, request, id_camp, nombre, apellido, format=None):
-        difuntosObj = Difunto.objects.filter(Q(id_camposanto=id_camp) & (Q(nombre=nombre) | Q(apellido=apellido)))
+    def get(self, request, id_camp, nombre, apellido, desde, hasta, lapida, sector, sepultura, format=None):
+        difuntosObj = Difunto.objects.filter(id_camposanto=id_camp, nombre=nombre, apellido=apellido)
+        if ((desde != 'null') & (hasta != 'null')):
+            date_1 = datetime.datetime.strptime((hasta), "%Y-%m-%d")
+            end_date = date_1 + datetime.timedelta(days=1)
+            difuntosObj = difuntosObj.filter(fecha_difuncion__range=(desde, end_date))
+        if (lapida != 'null'):
+            difuntosObj = difuntosObj.filter(no_lapida=lapida)
+        if (sector != 'null'):
+            difuntosObj = difuntosObj.filter(id_sector=sector)
+        if (sepultura != 'null'):
+            difuntosObj = difuntosObj.filter(id_tip_sepultura=sepultura)
         serializer = DifuntoSerializer(difuntosObj, many=True)
         return Response(serializer.data)
+
 
 '''API Rest get unico, post para Responsable'''
 class Responsable_difuntoView(APIView):

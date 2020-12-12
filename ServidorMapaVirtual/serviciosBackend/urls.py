@@ -18,7 +18,7 @@ urlpatterns = [
     path('difunto_post/', views.DifuntoView.as_view()),
     path('difunto/<str:pk>/', views.DifuntoViewSet.as_view()),
     path('difuntos/<str:id_camp>/', views.DifuntoListGet.as_view()),
-    path('difuntos/<str:id_camp>/<str:nombre>/<str:apellido>/', views.DifuntoListFilteredGet.as_view()),
+    path('difuntos/<str:id_camp>/<str:nombre>/<str:apellido>/<str:desde>/<str:hasta>/<str:lapida>/<str:sector>/<str:sepultura>/', views.DifuntoListFilteredGet.as_view()),
     path('responsable_difunto_post/', views.Responsable_difuntoView.as_view()),
     path('responsable_difunto_get/<str:id_difunto>/', views.Responsable_difuntoViewSet.as_view()),
     path('empresas/', views.EmpresasView.as_view()),
