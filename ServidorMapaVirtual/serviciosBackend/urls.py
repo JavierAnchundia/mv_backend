@@ -75,6 +75,14 @@ urlpatterns = [
     path('paquete_add/', views.PaquetesPost.as_view()),
     path('paquete_put_del/<str:id_paquete>/', views.PaqueteUpdateDelete.as_view()),
     path('paquetes_list/<str:id>/', views.PaquetesList.as_view()),
+
+    #Notificaciones agregar a PA
+    path('notificacion_add/', views.NotidicacionPost.as_view()),
+    path('notificacion_put_del/<str:id_notificacion>/', views.NotificacionUpdateDelete.as_view()),
+    path('notificacion_list/<str:id>/', views.NotificacionList.as_view()),
+
+    #Enviar push notificacion
+    path('enviarNotificacionPush/<str:id_notificacion>/', views.SendPushNotificationDevice.as_view()),
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)

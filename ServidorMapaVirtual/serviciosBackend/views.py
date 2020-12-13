@@ -10,8 +10,8 @@ from django.shortcuts import get_object_or_404
 from rest_framework.renderers import (HTMLFormRenderer, JSONRenderer,BrowsableAPIRenderer,)
 from .models import User, Empresa, Red_social, Camposanto, Punto_geolocalizacion, Sector, Tipo_sepultura, \
     Responsable_difunto, Difunto, Permiso, User_permisos, Homenajes, H_mensaje, H_imagen, H_video, H_audio, \
-    Historial_rosas, TokenDevice, Favoritos, Paquetes
-from .serializers import UserProfileSerializer, EmpresaSerializer, Red_socialSerializer, CamposantoSerializer, Punto_geoSerializer, SectorSerializer, Tipo_sepulturaSerializer, Responsable_difuntoSerializer, DifuntoSerializer, PermisoSerializer, User_permisosSerializer, HomenajeSerializer, H_mensajeSerializer, H_imagenSerializer, H_videoSerializer, H_audioSerializer,HomenajeSimpleSerializer, Historial_rosasSerializer,Log_RosasSerializer, Token_DeviceSerializer, FavoritosSerializer, FavoritosFullSerializer, PaquetesSerializer
+    Historial_rosas, TokenDevice, Favoritos, Paquetes, Notificaciones
+from .serializers import UserProfileSerializer, EmpresaSerializer, Red_socialSerializer, CamposantoSerializer, Punto_geoSerializer, SectorSerializer, Tipo_sepulturaSerializer, Responsable_difuntoSerializer, DifuntoSerializer, PermisoSerializer, User_permisosSerializer, HomenajeSerializer, H_mensajeSerializer, H_imagenSerializer, H_videoSerializer, H_audioSerializer,HomenajeSimpleSerializer, Historial_rosasSerializer,Log_RosasSerializer, Token_DeviceSerializer, FavoritosSerializer, FavoritosFullSerializer, PaquetesSerializer, NotificacionSerializer
 from .servicioFacebook import Facebook
 from .get_jwt_user import Json_web_token
 import base64
@@ -23,7 +23,9 @@ from django.core.files.storage import default_storage
 # para token reset password
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from .sendEmail import enviarEmailToUserContrasena
-
+# para enviar notificaciones
+from .sendPushNotification import sendNotificaction
+from threading import Thread
 '''API Rest get unico, get list, post y put para Camposanto'''
 class CamposantoView(APIView):
     permission_classes = (IsAuthenticated,)
@@ -772,3 +774,62 @@ class PaqueteUpdateDelete(APIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 # end Paquetes
+
+# begin Notificacion
+class NotidicacionPost(APIView):
+    # permission_classes = (IsAuthenticated,)
+    def post(self, request, format=None):
+        serializer = NotificacionSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class NotificacionList(APIView):
+    def get(self, request, id, format=None):
+        notificacionList = Notificaciones.objects.filter(Q(id_camposanto=id))
+        serializer = NotificacionSerializer(notificacionList, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+class NotificacionUpdateDelete(APIView):
+    def get_object(self, id_notificacion):
+        try:
+            return Notificaciones.objects.get(id_notificacion=id_notificacion)
+        except Notificaciones.DoesNotExist:
+            raise Http404
+    def put(self, request, id_notificacion, format=None):
+        notificacionObj = self.get_object(id_notificacion)
+        serializer = NotificacionSerializer(notificacionObj, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    def delete(self, request, id_notificacion, format=None):
+        notificacionObj = self.get_object(id_notificacion)
+        notificacionObj.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+# end notificacion
+
+class SendPushNotificationDevice(APIView):
+    def get_object(self, id_notificacion):
+        try:
+            return Notificaciones.objects.get(id_notificacion=id_notificacion)
+        except Notificaciones.DoesNotExist:
+            raise Http404
+    def get(self, request, id_notificacion, format=None):
+        notificacionObj = self.get_object(id_notificacion)
+        if notificacionObj:
+            serializer = NotificacionSerializer(notificacionObj)
+            retorno = sendNotificaction(
+                serializer['id_camposanto'].value,
+                serializer['titulo'].value,
+                serializer['mensaje'].value
+            )
+            if(retorno == 1):
+                notificacionObj.estado = "enviada"
+                notificacionObj.save()
+                return Response(data={'status': "success"}, status=status.HTTP_200_OK)
+            else:
+                return Response(data={'status': "error"}, status=status.HTTP_503_SERVICE_UNAVAILABLE)
+        return Response(data={'status': "error"}, status=status.HTTP_404_NOT_FOUND)

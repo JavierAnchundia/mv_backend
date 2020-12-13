@@ -221,3 +221,17 @@ class Paquetes(models.Model):
     imagen = models.ImageField(upload_to='paquetes', max_length=200, null=True, blank=True)
     fecha_created = models.DateField()
     id_camposanto = models.ForeignKey(Camposanto, on_delete=models.CASCADE)
+
+class Notificaciones(models.Model):
+    enviada = 'enviada'
+    no_enviada = 'no_enviada'
+    estado_choice = [
+        (enviada, 'enviada'),
+        (no_enviada, 'no_enviada')
+    ]
+    id_notificacion = models.AutoField(primary_key = True, unique = True)
+    titulo = models.CharField(max_length=70)
+    mensaje = models.CharField(max_length=500)
+    fecha_created = models.DateField()
+    estado = models.CharField(max_length=40, choices=estado_choice, default=no_enviada)
+    id_camposanto = models.ForeignKey(Camposanto, on_delete=models.CASCADE)
