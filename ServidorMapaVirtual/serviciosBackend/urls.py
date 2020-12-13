@@ -18,7 +18,7 @@ urlpatterns = [
     path('difunto_post/', views.DifuntoView.as_view()),
     path('difunto/<str:pk>/', views.DifuntoViewSet.as_view()),
     path('difuntos/<str:id_camp>/', views.DifuntoListGet.as_view()),
-    path('difuntos/<str:id_camp>/<str:nombre>/<str:apellido>/', views.DifuntoListFilteredGet.as_view()),
+    path('difuntos/<str:id_camp>/<str:nombre>/<str:apellido>/<str:desde>/<str:hasta>/<str:lapida>/<str:sector>/<str:sepultura>/', views.DifuntoListFilteredGet.as_view()),
     path('responsable_difunto_post/', views.Responsable_difuntoView.as_view()),
     path('responsable_difunto_get/<str:id_difunto>/', views.Responsable_difuntoViewSet.as_view()),
     path('empresas/', views.EmpresasView.as_view()),
@@ -60,6 +60,7 @@ urlpatterns = [
     #get user by id
     path('get_user_by_id/<str:id>/', views.UsuarioGetById.as_view()),
 
+
     # Post para token device
     path('post_token_device/', views.TokenDevicePost.as_view()),
     # Get and put token device
@@ -71,7 +72,8 @@ urlpatterns = [
     path('favoritos_list/<str:id>/', views.Favoritos_List.as_view()),
     path('favoritos_del/<str:id_usuario>/<str:id_difunto>/', views.FavoritosDelete.as_view()),
 
-    #Paquetes agregar a PA
+
+    path('info_permiso_user/<str:pk>/', views.Info_Permiso_User.as_view()),
     path('paquete_add/', views.PaquetesPost.as_view()),
     path('paquete_put_del/<str:id_paquete>/', views.PaqueteUpdateDelete.as_view()),
     path('paquetes_list/<str:id>/', views.PaquetesList.as_view()),

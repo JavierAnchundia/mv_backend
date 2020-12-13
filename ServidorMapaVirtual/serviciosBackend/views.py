@@ -11,7 +11,7 @@ from rest_framework.renderers import (HTMLFormRenderer, JSONRenderer,BrowsableAP
 from .models import User, Empresa, Red_social, Camposanto, Punto_geolocalizacion, Sector, Tipo_sepultura, \
     Responsable_difunto, Difunto, Permiso, User_permisos, Homenajes, H_mensaje, H_imagen, H_video, H_audio, \
     Historial_rosas, TokenDevice, Favoritos, Paquetes, Notificaciones
-from .serializers import UserProfileSerializer, EmpresaSerializer, Red_socialSerializer, CamposantoSerializer, Punto_geoSerializer, SectorSerializer, Tipo_sepulturaSerializer, Responsable_difuntoSerializer, DifuntoSerializer, PermisoSerializer, User_permisosSerializer, HomenajeSerializer, H_mensajeSerializer, H_imagenSerializer, H_videoSerializer, H_audioSerializer,HomenajeSimpleSerializer, Historial_rosasSerializer,Log_RosasSerializer, Token_DeviceSerializer, FavoritosSerializer, FavoritosFullSerializer, PaquetesSerializer, NotificacionSerializer
+from .serializers import UserProfileSerializer, EmpresaSerializer, Red_socialSerializer, CamposantoSerializer, Punto_geoSerializer, SectorSerializer, Tipo_sepulturaSerializer, Responsable_difuntoSerializer, DifuntoSerializer, PermisoSerializer, User_permisosSerializer, Info_permisosSerializer, HomenajeSerializer, H_mensajeSerializer, H_imagenSerializer, H_videoSerializer, H_audioSerializer, HomenajeSimpleSerializer, Historial_rosasSerializer,Log_RosasSerializer, Token_DeviceSerializer, FavoritosSerializer, FavoritosFullSerializer, PaquetesSerializer, NotificacionSerializer
 from .servicioFacebook import Facebook
 from .get_jwt_user import Json_web_token
 import base64
@@ -26,6 +26,8 @@ from .sendEmail import enviarEmailToUserContrasena
 # para enviar notificaciones
 from .sendPushNotification import sendNotificaction
 from threading import Thread
+import datetime
+
 '''API Rest get unico, get list, post y put para Camposanto'''
 class CamposantoView(APIView):
     permission_classes = (IsAuthenticated,)
@@ -163,10 +165,21 @@ class DifuntoListGet(APIView):
         return Response(serializer.data)
 
 class DifuntoListFilteredGet(APIView):
-    def get(self, request, id_camp, nombre, apellido, format=None):
-        difuntosObj = Difunto.objects.filter(Q(id_camposanto=id_camp) & (Q(nombre=nombre) | Q(apellido=apellido)))
+    def get(self, request, id_camp, nombre, apellido, desde, hasta, lapida, sector, sepultura, format=None):
+        difuntosObj = Difunto.objects.filter(id_camposanto=id_camp, nombre=nombre, apellido=apellido)
+        if ((desde != 'null') & (hasta != 'null')):
+            date_1 = datetime.datetime.strptime((hasta), "%Y-%m-%d")
+            end_date = date_1 + datetime.timedelta(days=1)
+            difuntosObj = difuntosObj.filter(fecha_difuncion__range=(desde, end_date))
+        if (lapida != 'null'):
+            difuntosObj = difuntosObj.filter(no_lapida=lapida)
+        if (sector != 'null'):
+            difuntosObj = difuntosObj.filter(id_sector=sector)
+        if (sepultura != 'null'):
+            difuntosObj = difuntosObj.filter(id_tip_sepultura=sepultura)
         serializer = DifuntoSerializer(difuntosObj, many=True)
         return Response(serializer.data)
+
 
 '''API Rest get unico, post para Responsable'''
 class Responsable_difuntoView(APIView):
@@ -305,6 +318,17 @@ class Permiso_Info(APIView):
     def get(self, request, pk):
         permisoObj = self.get_object(pk)
         serializer = PermisoSerializer(permisoObj)
+        return Response(serializer.data)
+class Info_Permiso_User(APIView):
+    def get_object(self,pk):
+        try:
+            return User_permisos.objects.filter(Q(id_user=pk))
+        except Permiso.DoesNotExist:
+            raise Http404
+
+    def get(self, request, pk):
+        permisoObj = self.get_object(pk)
+        serializer = Info_permisosSerializer(permisoObj, many=True)
         return Response(serializer.data)
 
 # Obtener permisos de un usuario o eliminar los permisos de un usuario

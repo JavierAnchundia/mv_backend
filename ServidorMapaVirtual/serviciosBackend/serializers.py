@@ -60,6 +60,12 @@ class User_permisosSerializer(serializers.ModelSerializer):
         model = User_permisos
         fields = '__all__'
 
+class Info_permisosSerializer(serializers.ModelSerializer):
+    permiso_name = serializers.CharField(source='id_permiso.nombre')
+
+    class Meta:
+        model = User_permisos
+        fields = ('id_user_permiso', 'id_user', 'id_permiso', 'permiso_name')
 #PENDIENTE DE AGREGAR A PYTHON ANYWHERE
 
 class UserProfileSerializer(serializers.ModelSerializer):
@@ -82,7 +88,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
             'tipo_usuario',
             'is_active',
         )
-        #extra_kwargs = {'password': {'write_only': True}}
+        extra_kwargs = {'password': {'write_only': True}}
 
     def create(self, validated_data):
         print('imagen' in validated_data)
