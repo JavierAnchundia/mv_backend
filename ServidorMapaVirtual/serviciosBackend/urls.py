@@ -77,6 +77,7 @@ urlpatterns = [
     path('paquete_add/', views.PaquetesPost.as_view()),
     path('paquete_put_del/<str:id_paquete>/', views.PaqueteUpdateDelete.as_view()),
     path('paquetes_list/<str:id>/', views.PaquetesList.as_view()),
+    path('paquetes_rec/<str:id>/', views.paquetesRecientes.as_view()),
 
     #Notificaciones agregar a PA
     path('notificacion_add/', views.NotidicacionPost.as_view()),

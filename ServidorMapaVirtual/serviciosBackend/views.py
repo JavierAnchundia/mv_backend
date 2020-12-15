@@ -797,6 +797,11 @@ class PaqueteUpdateDelete(APIView):
         default_storage.delete(path)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
+class paquetesRecientes(APIView):
+    def get(self, request, id, format=None):
+        paquetesList = Paquetes.objects.filter(Q(id_camposanto=id)).order_by('-id_paquete')[:6]
+        serializer = PaquetesSerializer(paquetesList, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 # end Paquetes
 
 # begin Notificacion
