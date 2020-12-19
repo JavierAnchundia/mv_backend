@@ -166,11 +166,15 @@ class DifuntoListGet(APIView):
 
 class DifuntoListFilteredGet(APIView):
     def get(self, request, id_camp, nombre, apellido, desde, hasta, lapida, sector, sepultura, format=None):
-        difuntosObj = Difunto.objects.filter(id_camposanto=id_camp, nombre=nombre, apellido=apellido)
+        difuntosObj = Difunto.objects.filter(id_camposanto=id_camp)
+        if (nombre != 'null'):
+            difuntosObj = Difunto.objects.filter(nombre=nombre)
+        if (apellido != 'null'):
+            difuntosObj = Difunto.objects.filter(apellido=apellido)
         if ((desde != 'null') & (hasta != 'null')):
-            date_1 = datetime.datetime.strptime((hasta), "%Y-%m-%d")
-            end_date = date_1 + datetime.timedelta(days=1)
-            difuntosObj = difuntosObj.filter(fecha_difuncion__range=(desde, end_date))
+            # date_1 = datetime.datetime.strptime((hasta), "%Y-%m-%d")
+            # end_date = date_1 + datetime.timedelta(days=1)
+            difuntosObj = difuntosObj.filter(fecha_difuncion__range=(desde, hasta))
         if (lapida != 'null'):
             difuntosObj = difuntosObj.filter(no_lapida=lapida)
         if (sector != 'null'):
