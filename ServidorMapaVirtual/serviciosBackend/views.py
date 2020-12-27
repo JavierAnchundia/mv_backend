@@ -11,7 +11,12 @@ from rest_framework.renderers import (HTMLFormRenderer, JSONRenderer,BrowsableAP
 from .models import User, Empresa, Red_social, Camposanto, Punto_geolocalizacion, Sector, Tipo_sepultura, \
     Responsable_difunto, Difunto, Permiso, User_permisos, Homenajes, H_mensaje, H_imagen, H_video, H_audio, \
     Historial_rosas, TokenDevice, Favoritos, Paquetes, Notificaciones
-from .serializers import UserProfileSerializer, EmpresaSerializer, Red_socialSerializer, CamposantoSerializer, Punto_geoSerializer, SectorSerializer, Tipo_sepulturaSerializer, Responsable_difuntoSerializer, DifuntoSerializer, PermisoSerializer, User_permisosSerializer, Info_permisosSerializer, HomenajeSerializer, H_mensajeSerializer, H_imagenSerializer, H_videoSerializer, H_audioSerializer, HomenajeSimpleSerializer, Historial_rosasSerializer,Log_RosasSerializer, Token_DeviceSerializer, FavoritosSerializer, FavoritosFullSerializer, PaquetesSerializer, NotificacionSerializer
+from .serializers import UserProfileSerializer, EmpresaSerializer, Red_socialSerializer, CamposantoSerializer, \
+    Punto_geoSerializer, SectorSerializer, Tipo_sepulturaSerializer, Responsable_difuntoSerializer, DifuntoSerializer, \
+    PermisoSerializer, User_permisosSerializer, Info_permisosSerializer, HomenajeSerializer, H_mensajeSerializer, \
+    H_imagenSerializer, H_videoSerializer, H_audioSerializer, HomenajeSimpleSerializer, Historial_rosasSerializer, \
+    Log_RosasSerializer, Token_DeviceSerializer, FavoritosSerializer, FavoritosFullSerializer, PaquetesSerializer, \
+    NotificacionSerializer, H_youtubeSerializer
 from .servicioFacebook import Facebook
 from .get_jwt_user import Json_web_token
 import base64
@@ -502,6 +507,17 @@ class Hvideo_Set(APIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+#Crear contenido pagado de video
+class Hyoutube_Set(APIView):
+    #permission_classes = (IsAuthenticated,)
+
+    def post(self, request, format=None):
+        serializer = H_youtubeSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 # Obtener contenido de audio para homenaje
 class Haudio_Get(APIView):
     def get(self, request, id, format=None):
@@ -866,3 +882,19 @@ class SendPushNotificationDevice(APIView):
             else:
                 return Response(data={'status': "error"}, status=status.HTTP_503_SERVICE_UNAVAILABLE)
         return Response(data={'status': "error"}, status=status.HTTP_404_NOT_FOUND)
+
+
+
+# Obtener homenajes GRATUITOS por id de difunto
+class HomenajeFree_Get(APIView):
+    def get(self, request, id, format=None):
+        user_homenajesObj = Homenajes.objects.filter(id_difunto=id, gratuito=True)
+        serializer = HomenajeSerializer(user_homenajesObj, many=True)
+        return Response(serializer.data)
+
+# Obtener homenajes PAGADOS por id de difunto
+class HomenajePaid_Get(APIView):
+    def get(self, request, id, format=None):
+        user_homenajesObj = Homenajes.objects.filter(id_difunto=id, gratuito=False)
+        serializer = HomenajeSerializer(user_homenajesObj, many=True)
+        return Response(serializer.data)

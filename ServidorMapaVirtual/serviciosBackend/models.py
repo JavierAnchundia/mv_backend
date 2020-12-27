@@ -189,17 +189,23 @@ class H_audio(models.Model):
     mensaje = models.CharField(max_length=200)
     audio = models.FileField(upload_to='h_audio', max_length=200, null=True, blank=True)
 
+class H_youtube(models.Model):
+    id_youtube = models.AutoField(primary_key = True, unique = True)
+    mensaje = models.CharField(max_length=200)
+    video = models.CharField(max_length=300)
+
 class Homenajes(models.Model):
     id_homenaje = models.AutoField(primary_key = True, unique = True)
     id_usuario = models.ForeignKey(User,on_delete=models.CASCADE )
     id_difunto = models.ForeignKey(Difunto, on_delete= models.CASCADE)
     fecha_publicacion = models.DateTimeField()
     estado = models.BooleanField(default=True)
-    likes = models.IntegerField(default=0)
+    gratuito = models.BooleanField(default=True)
     id_textcontent = models.ForeignKey(H_mensaje, on_delete= models.CASCADE, blank=True, null=True)
     id_imagecontent = models.ForeignKey(H_imagen, on_delete= models.CASCADE, blank=True,null=True)
     id_videocontent = models.ForeignKey(H_video, on_delete= models.CASCADE, blank=True, null=True)
     id_audiocontent = models.ForeignKey(H_audio, on_delete= models.CASCADE, blank=True, null=True)
+    id_youtube = models.ForeignKey(H_youtube, on_delete= models.CASCADE, blank=True, null=True)
 
 class Historial_rosas(models.Model):
     id_rosa = models.AutoField(primary_key = True, unique = True)

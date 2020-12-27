@@ -37,6 +37,7 @@ urlpatterns = [
     path('himagen_post/', views.Himagen_Set.as_view()),
     path('hvideo_post/', views.Hvideo_Set.as_view()),
     path('haudio_post/', views.Haudio_Set.as_view()),
+    path('hyoutube_post/', views.Hyoutube_Set.as_view()),
     path('difunto/update-partial/<str:pk>/<str:num_rosas>/',views.AmountPartialUpdateView.as_view()),
     path('historial_rosas/<str:id>/', views.Historial_rosasGet.as_view()),
     path('historial_rosas_post/', views.Historial_rosasSet.as_view()),
@@ -86,6 +87,10 @@ urlpatterns = [
 
     #Enviar push notificacion
     path('enviarNotificacionPush/<str:id_notificacion>/', views.SendPushNotificationDevice.as_view()),
+
+    path('homenajesFree/<str:id>/', views.HomenajeFree_Get.as_view()),
+    path('homenajesPaid/<str:id>/', views.HomenajePaid_Get.as_view())
+
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)

@@ -1,5 +1,7 @@
 from rest_framework import serializers
-from .models import User, Empresa, Red_social, Camposanto, Punto_geolocalizacion, Sector, Tipo_sepultura, Responsable_difunto, Difunto, Permiso, User_permisos, Homenajes, H_mensaje, H_imagen, H_video, H_audio, Historial_rosas, TokenDevice, Favoritos, Paquetes, Notificaciones
+from .models import User, Empresa, Red_social, Camposanto, Punto_geolocalizacion, Sector, Tipo_sepultura, \
+    Responsable_difunto, Difunto, Permiso, User_permisos, Homenajes, H_mensaje, H_imagen, H_video, H_audio, \
+    Historial_rosas, TokenDevice, Favoritos, Paquetes, Notificaciones, H_youtube
 from django.conf import settings
 from django.core.mail import send_mail
 
@@ -143,6 +145,11 @@ class H_audioSerializer(serializers.ModelSerializer):
         model = H_audio
         fields = '__all__'
 
+class H_youtubeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = H_youtube
+        fields = '__all__'
+
 class HomenajeSerializer(serializers.ModelSerializer):
     id_usuario = UserProfileSerializer()
     id_difunto = DifuntoSerializer(required=False)
@@ -150,7 +157,7 @@ class HomenajeSerializer(serializers.ModelSerializer):
     id_imagecontent = H_imagenSerializer(required=False)
     id_videocontent = H_videoSerializer(required=False)
     id_audiocontent = H_audioSerializer(required=False)
-
+    id_youtube = H_youtubeSerializer(required=False)
     class Meta:
         model = Homenajes
         fields = '__all__'
@@ -198,3 +205,5 @@ class NotificacionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Notificaciones
         fields = '__all__'
+
+
