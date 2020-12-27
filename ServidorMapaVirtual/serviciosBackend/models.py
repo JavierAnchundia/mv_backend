@@ -219,6 +219,7 @@ class TokenDevice(models.Model):
     token_device = models.CharField(max_length=1500)
     plataform = models.CharField(max_length=25, default=None, null=True, blank=True)
     id_user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
+    id_camposanto = models.ForeignKey(Camposanto, on_delete=models.CASCADE, null=True, blank=True )
 
 class Favoritos(models.Model):
     id_favorito = models.AutoField(primary_key = True, unique = True)
