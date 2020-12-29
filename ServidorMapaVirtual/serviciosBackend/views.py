@@ -10,13 +10,13 @@ from django.shortcuts import get_object_or_404
 from rest_framework.renderers import (HTMLFormRenderer, JSONRenderer,BrowsableAPIRenderer,)
 from .models import User, Empresa, Red_social, Camposanto, Punto_geolocalizacion, Sector, Tipo_sepultura, \
     Responsable_difunto, Difunto, Permiso, User_permisos, Homenajes, H_mensaje, H_imagen, H_video, H_audio, \
-    Historial_rosas, TokenDevice, Favoritos, Paquetes, Notificaciones
+    Historial_rosas, TokenDevice, Favoritos, Paquetes, Notificaciones, Contacto
 from .serializers import UserProfileSerializer, EmpresaSerializer, Red_socialSerializer, CamposantoSerializer, \
     Punto_geoSerializer, SectorSerializer, Tipo_sepulturaSerializer, Responsable_difuntoSerializer, DifuntoSerializer, \
     PermisoSerializer, User_permisosSerializer, Info_permisosSerializer, HomenajeSerializer, H_mensajeSerializer, \
     H_imagenSerializer, H_videoSerializer, H_audioSerializer, HomenajeSimpleSerializer, Historial_rosasSerializer, \
     Log_RosasSerializer, Token_DeviceSerializer, FavoritosSerializer, FavoritosFullSerializer, PaquetesSerializer, \
-    NotificacionSerializer, H_youtubeSerializer
+    NotificacionSerializer, H_youtubeSerializer, ContactoSerializer, Contacto_userSerializer
 from .servicioFacebook import Facebook
 from .get_jwt_user import Json_web_token
 import base64
@@ -898,3 +898,52 @@ class HomenajePaid_Get(APIView):
         user_homenajesObj = Homenajes.objects.filter(id_difunto=id, gratuito=False)
         serializer = HomenajeSerializer(user_homenajesObj, many=True)
         return Response(serializer.data)
+
+class ContactoPost(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request, format=None):
+        contactoObj = Contacto.objects.all()
+        serializer = ContactoSerializer(contactoObj, many=True)
+        return Response(serializer.data)
+
+    def post(self, request, format=None):
+        serializer = ContactoSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class ContactoCamposanto(APIView):
+
+    def get_object(self, id_camposanto):
+        try:
+            return Contacto.objects.filter(id_camposanto=id_camposanto)
+        except Responsable_difunto.DoesNotExist:
+            raise Http404
+
+    def get(self, request, id_camposanto, format=None):
+        contactoObj = self.get_object(id_camposanto)
+        serializer = Contacto_userSerializer(contactoObj, many=True)
+        return Response(serializer.data)
+
+class ContactoView(APIView):
+
+    def get_object(self, id_contacto):
+        try:
+            return Contacto.objects.get(id_contacto=id_contacto)
+        except Contacto.DoesNotExist:
+            raise Http404
+
+    def delete(self, request, id_contacto, format=None):
+        contactoObj = self.get_object(id_contacto)
+        seri = ContactoSerializer(contactoObj)
+        path = seri['imagen'].value[7:]
+        contactoObj.delete()
+        default_storage.delete(path)
+
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+

@@ -248,3 +248,12 @@ class Notificaciones(models.Model):
     fecha_created = models.DateField()
     estado = models.CharField(max_length=40, choices=estado_choice, default=no_enviada)
     id_camposanto = models.ForeignKey(Camposanto, on_delete=models.CASCADE)
+
+class Contacto(models.Model):
+    id_contacto = models.AutoField(primary_key = True, unique = True)
+    imagen = models.ImageField(upload_to = 'sugerencias', max_length = 500, null = True, blank = True)
+    mensaje = models.CharField(max_length=500)
+    fecha_emision = models.DateField()
+    id_camposanto = models.ForeignKey(Camposanto, on_delete=models.CASCADE)
+    id_usuario = models.ForeignKey(User, on_delete=models.CASCADE)
+

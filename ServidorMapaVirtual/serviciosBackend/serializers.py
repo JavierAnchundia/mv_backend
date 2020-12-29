@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from .models import User, Empresa, Red_social, Camposanto, Punto_geolocalizacion, Sector, Tipo_sepultura, \
     Responsable_difunto, Difunto, Permiso, User_permisos, Homenajes, H_mensaje, H_imagen, H_video, H_audio, \
-    Historial_rosas, TokenDevice, Favoritos, Paquetes, Notificaciones, H_youtube
+    Historial_rosas, TokenDevice, Favoritos, Paquetes, Notificaciones, H_youtube, Contacto
 from django.conf import settings
 from django.core.mail import send_mail
 
@@ -68,6 +68,9 @@ class Info_permisosSerializer(serializers.ModelSerializer):
     class Meta:
         model = User_permisos
         fields = ('id_user_permiso', 'id_user', 'id_permiso', 'permiso_name')
+
+
+
 #PENDIENTE DE AGREGAR A PYTHON ANYWHERE
 
 class UserProfileSerializer(serializers.ModelSerializer):
@@ -206,4 +209,14 @@ class NotificacionSerializer(serializers.ModelSerializer):
         model = Notificaciones
         fields = '__all__'
 
+class ContactoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Contacto
+        fields = '__all__'
 
+class Contacto_userSerializer(serializers.ModelSerializer):
+
+    user_username = serializers.CharField(source='id_usuario.username')
+    class Meta:
+        model = Contacto
+        fields = ('id_contacto', 'imagen', 'mensaje', 'fecha_emision', 'id_camposanto', 'id_usuario', 'user_username')

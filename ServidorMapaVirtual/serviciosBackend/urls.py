@@ -89,7 +89,12 @@ urlpatterns = [
     path('enviarNotificacionPush/<str:id_notificacion>/', views.SendPushNotificationDevice.as_view()),
 
     path('homenajesFree/<str:id>/', views.HomenajeFree_Get.as_view()),
-    path('homenajesPaid/<str:id>/', views.HomenajePaid_Get.as_view())
+    path('homenajesPaid/<str:id>/', views.HomenajePaid_Get.as_view()),
+
+
+    path('contactoPost/', views.ContactoPost.as_view()),
+    path('contactoCamposanto/<str:id_camposanto>/', views.ContactoCamposanto.as_view()),
+    path('contacto/<str:id_contacto>/', views.ContactoView.as_view())
 
 ]
 
