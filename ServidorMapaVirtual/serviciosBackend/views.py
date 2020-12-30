@@ -908,6 +908,16 @@ class ContactoPost(APIView):
         return Response(serializer.data)
 
     def post(self, request, format=None):
+        if ('img_base64' in request.data):
+            format, imgstr = request.data['img_base64'].split(';base64,')
+            ext = format.split('/')[-1]
+            nameFile = request.data['nombre_file']
+            imag = ContentFile(base64.b64decode(imgstr), name=nameFile)
+            request.data._mutable = True
+            del request.data['img_base64']
+            del request.data['nombre_file']
+            request.data['imagen'] = imag
+            request.data._mutable = False
         serializer = ContactoSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
@@ -939,10 +949,10 @@ class ContactoView(APIView):
     def delete(self, request, id_contacto, format=None):
         contactoObj = self.get_object(id_contacto)
         seri = ContactoSerializer(contactoObj)
-        path = seri['imagen'].value[7:]
+        if(seri['imagen'].value != None):
+            path = seri['imagen'].value[7:]
+            default_storage.delete(path)
         contactoObj.delete()
-        default_storage.delete(path)
-
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 

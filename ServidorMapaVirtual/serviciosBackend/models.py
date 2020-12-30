@@ -257,3 +257,7 @@ class Contacto(models.Model):
     id_camposanto = models.ForeignKey(Camposanto, on_delete=models.CASCADE)
     id_usuario = models.ForeignKey(User, on_delete=models.CASCADE)
 
+    class Meta:
+        verbose_name = "Sugerencia"
+        verbose_name_plural = "Sugerencias"
+
