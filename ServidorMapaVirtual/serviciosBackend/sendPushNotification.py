@@ -11,7 +11,7 @@ from django.http import HttpResponse
 from pyfcm import FCMNotification
 load_dotenv()
 
-def sendNotificaction(id_camposanto, title, body):
+def sendNotificaction(id_camposanto, title, body, tipo):
     try:
         push_service = FCMNotification(api_key=os.getenv("FCM_KEY"))
         registration_ids = []
@@ -22,7 +22,8 @@ def sendNotificaction(id_camposanto, title, body):
 
         data_message = {
             "title": title,
-            "message": body
+            "message": body,
+            "type": tipo
         }
 
         result = push_service.notify_multiple_devices(

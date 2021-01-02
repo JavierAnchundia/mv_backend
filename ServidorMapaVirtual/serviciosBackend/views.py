@@ -873,7 +873,8 @@ class SendPushNotificationDevice(APIView):
             retorno = sendNotificaction(
                 serializer['id_camposanto'].value,
                 serializer['titulo'].value,
-                serializer['mensaje'].value
+                serializer['mensaje'].value,
+                serializer['tipo'].value
             )
             if(retorno == 1):
                 notificacionObj.estado = "enviada"
