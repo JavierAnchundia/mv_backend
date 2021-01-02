@@ -94,7 +94,10 @@ urlpatterns = [
 
     path('contactoPost/', views.ContactoPost.as_view()),
     path('contactoCamposanto/<str:id_camposanto>/', views.ContactoCamposanto.as_view()),
-    path('contacto/<str:id_contacto>/', views.ContactoView.as_view())
+    path('contacto/<str:id_contacto>/', views.ContactoView.as_view()),
+
+    path('homenajesDel/<str:id_homenaje>/', views.Homenaje_Del.as_view()),
+    path('hyoutube_del/<str:id_youtube>/', views.Hyoutube_Delete.as_view()),
 
 ]
 

@@ -10,7 +10,7 @@ from django.shortcuts import get_object_or_404
 from rest_framework.renderers import (HTMLFormRenderer, JSONRenderer,BrowsableAPIRenderer,)
 from .models import User, Empresa, Red_social, Camposanto, Punto_geolocalizacion, Sector, Tipo_sepultura, \
     Responsable_difunto, Difunto, Permiso, User_permisos, Homenajes, H_mensaje, H_imagen, H_video, H_audio, \
-    Historial_rosas, TokenDevice, Favoritos, Paquetes, Notificaciones, Contacto
+    Historial_rosas, TokenDevice, Favoritos, Paquetes, Notificaciones, Contacto, H_youtube
 from .serializers import UserProfileSerializer, EmpresaSerializer, Red_socialSerializer, CamposantoSerializer, \
     Punto_geoSerializer, SectorSerializer, Tipo_sepulturaSerializer, Responsable_difuntoSerializer, DifuntoSerializer, \
     PermisoSerializer, User_permisosSerializer, Info_permisosSerializer, HomenajeSerializer, H_mensajeSerializer, \
@@ -404,7 +404,7 @@ class Create_User_Facebook(APIView):
 # Obtener homenajes por id de difunto
 class Homenaje_Get(APIView):
     def get(self, request, id, format=None):
-        user_homenajesObj = Homenajes.objects.filter(Q(id_difunto=id))
+        user_homenajesObj = Homenajes.objects.filter(id_difunto=id, estado=True)
         serializer = HomenajeSerializer(user_homenajesObj, many=True)
         return Response(serializer.data)
 
@@ -953,7 +953,34 @@ class ContactoView(APIView):
             path = seri['imagen'].value[7:]
             default_storage.delete(path)
         contactoObj.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        return Response(status=status.HTTP_200_OK)
+
+class Homenaje_Del(APIView):
+
+    def get_object(self, id_homenaje):
+        try:
+            return Homenajes.objects.get(id_homenaje=id_homenaje)
+        except Homenajes.DoesNotExist:
+            raise Http404
+
+    def put(self, request, id_homenaje, format = None):
+        homenajeObj = self.get_object(id_homenaje)
+        serializer = HomenajeSerializer(homenajeObj, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+
+class Hyoutube_Delete(APIView):
+    def get_object(self, id_youtube):
+        try:
+            return H_youtube.objects.get(id_youtube=id_youtube)
+        except H_youtube.DoesNotExist:
+            raise Http404
+    def delete(self, request, id_youtube, format=None):
+        youtubeObj = self.get_object(id_youtube)
+        youtubeObj.delete()
+        return Response(status=status.HTTP_200_OK)
 
