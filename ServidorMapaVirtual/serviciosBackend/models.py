@@ -242,11 +242,18 @@ class Notificaciones(models.Model):
         (enviada, 'enviada'),
         (no_enviada, 'no_enviada')
     ]
+    paquete = 'paquete'
+    tip = 'tip'
+    tipo_choice = [
+        (paquete, 'paquete'),
+        (tip, 'tip')
+    ]
     id_notificacion = models.AutoField(primary_key = True, unique = True)
     titulo = models.CharField(max_length=70)
     mensaje = models.CharField(max_length=500)
     fecha_created = models.DateField()
     estado = models.CharField(max_length=40, choices=estado_choice, default=no_enviada)
+    tipo = models.CharField(max_length=40, choices=tipo_choice, default=tip)
     id_camposanto = models.ForeignKey(Camposanto, on_delete=models.CASCADE)
 
 class Contacto(models.Model):
